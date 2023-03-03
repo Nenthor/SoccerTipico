@@ -23,12 +23,30 @@
       </div>
       <ul id="nav_list">
         <li class="nav_item">
-          <a href="/settings" class="nav_link">Anmelden</a>
-        </li>
-        <li class="nav_item">
-          <a href="https://www.netflix.com" class="nav_link">Einstellungen</a>
+          <a href="https://www.netflix.com" class="nav_link">Anmelden</a>
         </li>
       </ul>
     </nav>
+    <div class="register">
+      <div class="register_box">
+        <h2 class="register_title">Registrieren</h2>
+        <p class="register_description">Wähle einen Benutzernamen um Wetten abschließen zu können.</p>
+        <div id="register_form">
+          <div class="register_input_box">
+            <p class="register_input_text">Benutzername:</p>
+            <input type="text" class="register_input" id="username" autocomplete="off" maxlength="25" />
+          </div>
+          <div class="register_input_box">
+            <p class="register_input_text">Passwort:</p>
+            <input type="password" class="register_input" id="password" maxlength="25" />
+          </div>
+          <p id="register_error"></p>
+          <button type="submit" id="register_submit">Registrieren</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <p id="footer_text">Soccer</p>
+    </div>
   </body>
 </html>

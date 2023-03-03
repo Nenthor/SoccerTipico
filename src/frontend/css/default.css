@@ -44,10 +44,6 @@
   font-family: montserrat;
 }
 
-body {
-  background-color: #161616;
-}
-
 a:visited {
   text-decoration: none;
 }
@@ -67,8 +63,8 @@ nav {
   font-weight: bold;
   font-size: 1.5rem;
   letter-spacing: 0.1rem;
-  color: #3599f7;
-  text-shadow: 0 0 2px #35c0f7;
+  color: #3bc5e7;
+  text-shadow: 0 0 2px #398dd1;
   user-select: none;
 }
 
@@ -96,7 +92,7 @@ nav {
 }
 
 .nav_link:hover {
-  color: #35c9f7;
+  color: #3bc5e7;
   text-shadow: none;
 }
 
@@ -128,7 +124,7 @@ nav {
   }
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 600px) {
   #nav_toggle {
     display: inline-block;
   }

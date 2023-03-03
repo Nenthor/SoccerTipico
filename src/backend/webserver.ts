@@ -3,11 +3,14 @@ import fs from 'fs';
 import os from 'os';
 import http from 'http';
 import express from 'express';
-import config from './data/config.json';
+import bodyParser from 'body-parser';
+import { registerUser } from './handleUser.js';
 
 const app = express();
 const port = os.type() === 'Linux' ? 8888 : 8888;
 const dirname = path.resolve();
+
+app.use(bodyParser.json());
 
 app.use('/js', express.static(path.join(dirname, 'src/frontend/js')));
 app.use('/css', express.static(path.join(dirname, 'src/frontend/css')));
@@ -35,6 +38,11 @@ for (let page of pages) {
     });
   });
 }
+
+app.post('/api/register', async (req, res) => {
+  const response = await registerUser(req.body.username, req.body.password);
+  res.send(response);
+});
 
 app.get('*', (req, res) => {
   res.status(404);
