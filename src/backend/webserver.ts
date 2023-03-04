@@ -6,14 +6,21 @@ import express, { NextFunction, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
+import RedisStore from 'connect-redis';
+import { createClient } from 'redis';
 import { loginUser, registerUser } from './handleUser.js';
 import config from './data/config.json' assert { type: 'json' };
+import { getUser, User } from './database.js';
 
 const app = express();
 const port = os.type() === 'Linux' ? 8888 : 8888;
 const dirname = path.resolve();
 const SESSION_AGE = 1000 * 60 * 60 * 24 * 30; // 30d
 const SESSION_NAME = 'auth';
+
+const redisClient = createClient();
+redisClient.connect().catch(console.error);
+const redisStore = new RedisStore({ client: redisClient });
 
 declare module 'express-session' {
   export interface SessionData {
@@ -26,16 +33,26 @@ app.use(cookieParser());
 app.use(
   session({
     name: SESSION_NAME,
+    store: redisStore,
     resave: false,
     saveUninitialized: false,
+    secret: config.sessionSecret,
     cookie: {
       maxAge: SESSION_AGE,
       sameSite: true,
       secure: false //due to http
-    },
-    secret: config.sessionSecret
+    }
   })
 );
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  const { userID } = req.session;
+
+  if (userID) {
+    const user = await getUser(userID);
+    if (user) res.locals.user = user;
+  }
+  next();
+});
 
 app.use('/js', express.static(path.join(dirname, 'src/frontend/js')));
 app.use('/css', express.static(path.join(dirname, 'src/frontend/css')));
@@ -96,6 +113,12 @@ app.post('/api/logout', authCheck, async (req, res) => {
     res.clearCookie(SESSION_NAME);
     res.send({ success: true });
   });
+});
+
+app.post('/api/stats', authCheck, async (req, res) => {
+  const user: User = res.locals.user;
+  if (user) res.send({ success: true, username: user.username, points: user.points, bet: user.bet });
+  else res.send({ success: false, error: 'Benutzerdaten konnten nicht abgerufen werden.' });
 });
 
 app.get('*', (req, res) => {

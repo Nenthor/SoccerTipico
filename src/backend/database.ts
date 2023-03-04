@@ -20,7 +20,16 @@ export class User {
   }
 }
 
-export async function getUser(username: string) {
+export async function getUser(id: string) {
+  try {
+    const record = await pb.collection('users').getFirstListItem(`id="${id}"`);
+    return extractUser(record);
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function getUserByName(username: string) {
   try {
     const record = await pb.collection('users').getFirstListItem(`username="${username}"`);
     return extractUser(record);

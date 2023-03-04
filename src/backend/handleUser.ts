@@ -1,4 +1,4 @@
-import { User, createUser, getUser } from './database.js';
+import { User, createUser, getUserByName } from './database.js';
 import { timingSafeEqual, randomBytes, scryptSync } from 'crypto';
 import config from './data/config.json' assert { type: 'json' };
 import { Request } from 'express';
@@ -15,7 +15,7 @@ export async function registerUser(req: Request, username: string, password: str
 }
 
 export async function loginUser(req: Request, username: string, password: string) {
-  const user = await getUser(username);
+  const user = await getUserByName(username);
 
   if (user && checkPassword(password, user.password)) {
     req.session.userID = user.id; // Set Session
