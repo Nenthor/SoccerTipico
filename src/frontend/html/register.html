@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Soccer" />
+    <meta name="theme-color" content="#0077F7" />
+    <link rel="icon" href="/images/logo.webp?v=1.0" />
+    <link rel="stylesheet" href="/css/default.css" />
+    <link rel="stylesheet" href="/css/authentication.css" />
+    <script defer src="/js/default.js"></script>
+    <script defer src="/js/authentication.js"></script>
+    <title>Soccer</title>
+  </head>
+  <body>
+    <nav>
+      <h3 id="nav_title">Soccer</h3>
+      <div id="nav_toggle">
+        <span class="nav_bar"></span>
+        <span class="nav_bar"></span>
+        <span class="nav_bar"></span>
+      </div>
+      <ul id="nav_list">
+        <li class="nav_item">
+          <a href="/login" class="nav_link">Anmelden</a>
+        </li>
+      </ul>
+    </nav>
+    <div class="form">
+      <div class="form_frame">
+        <h2 class="form_title">Registrieren</h2>
+        <p class="form_description">Wähle einen Benutzernamen um Wetten abschließen zu können.</p>
+        <div id="form_box">
+          <div class="form_input_box">
+            <p class="form_input_text">Benutzername:</p>
+            <input type="text" class="form_input" id="username" autocomplete="off" maxlength="25" />
+          </div>
+          <div class="form_input_box">
+            <p class="form_input_text">Passwort:</p>
+            <input type="password" class="form_input" id="password" maxlength="25" />
+          </div>
+          <p id="form_error"></p>
+          <button type="submit" id="form_submit">Registrieren</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <p id="footer_text">Soccer</p>
+    </div>
+  </body>
+</html>

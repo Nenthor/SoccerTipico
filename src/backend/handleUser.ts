@@ -1,14 +1,21 @@
-import { User, createUser } from './database.js';
+import { User, createUser, getUser } from './database.js';
 import { timingSafeEqual, randomBytes, scryptSync } from 'crypto';
 import config from './data/config.json' assert { type: 'json' };
 
 export async function registerUser(username: string, password: string) {
   let user = new User('', username, generateHash(password), config.defaultPoints, '');
-  console.log(username);
+
   user = await createUser(user);
-  console.log(user.username);
-  if (!user) return { success: false, error: 'Benutzername ist bereits vergeben.' };
-  else return { success: true, username: user.username, password: user.password };
+
+  if (user) return { success: true, username: user.username, password: user.password };
+  else return { success: false, error: 'Benutzername ist bereits vergeben.' };
+}
+
+export async function loginUser(username: string, password: string) {
+  const user = await getUser(username);
+
+  if (checkPassword(password, user.password)) return { success: true, username: user.username, password: user.password };
+  else return { success: false, error: 'Benutzdaten stimmen nicht überein.' };
 }
 
 function generateHash(input: string) {

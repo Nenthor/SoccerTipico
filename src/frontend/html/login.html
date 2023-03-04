@@ -8,9 +8,9 @@
     <meta name="theme-color" content="#0077F7" />
     <link rel="icon" href="/images/logo.webp?v=1.0" />
     <link rel="stylesheet" href="/css/default.css" />
-    <link rel="stylesheet" href="/css/index.css" />
+    <link rel="stylesheet" href="/css/authentication.css" />
     <script defer src="/js/default.js"></script>
-    <script defer src="/js/index.js"></script>
+    <script defer src="/js/authentication.js"></script>
     <title>Soccer</title>
   </head>
   <body>
@@ -23,25 +23,25 @@
       </div>
       <ul id="nav_list">
         <li class="nav_item">
-          <a href="https://www.netflix.com" class="nav_link">Anmelden</a>
+          <a href="/register" class="nav_link">Registrieren</a>
         </li>
       </ul>
     </nav>
-    <div class="register">
-      <div class="register_box">
-        <h2 class="register_title">Registrieren</h2>
-        <p class="register_description">Wähle einen Benutzernamen um Wetten abschließen zu können.</p>
-        <div id="register_form">
-          <div class="register_input_box">
-            <p class="register_input_text">Benutzername:</p>
-            <input type="text" class="register_input" id="username" autocomplete="off" maxlength="25" />
+    <div class="form">
+      <div class="form_frame">
+        <h2 class="form_title">Anmelden</h2>
+        <p class="form_description">Gebe dein Benutzername und Passwort ein um weiter Wetten abschließen zu können.</p>
+        <div id="form_box">
+          <div class="form_input_box">
+            <p class="form_input_text">Benutzername:</p>
+            <input type="text" class="form_input" id="username" autocomplete="off" maxlength="25" />
           </div>
-          <div class="register_input_box">
-            <p class="register_input_text">Passwort:</p>
-            <input type="password" class="register_input" id="password" maxlength="25" />
+          <div class="form_input_box">
+            <p class="form_input_text">Passwort:</p>
+            <input type="password" class="form_input" id="password" maxlength="25" />
           </div>
-          <p id="register_error"></p>
-          <button type="submit" id="register_submit">Registrieren</button>
+          <p id="form_error"></p>
+          <button type="submit" id="form_submit">Anmelden</button>
         </div>
       </div>
     </div>

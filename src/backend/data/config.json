@@ -1,7 +1,7 @@
 {
   "defaultPoints": 100,
   "PocketBase": {
-    "ip": "127.0.0.1",
+    "ip": "192.168.178.48",
     "port": "8999",
     "email": "admin@kingnentwich.de",
     "password": "#BestePasswort"

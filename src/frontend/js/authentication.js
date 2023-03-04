@@ -1,12 +1,13 @@
-//Register
+//Authentication
 const username_input = document.getElementById('username');
 const password_input = document.getElementById('password');
-const submit = document.getElementById('register_submit');
+const submit = document.getElementById('form_submit');
 
-let is_registering = false;
+const type = window.location.pathname.substring(1);
+let waiting = false;
 
 submit.addEventListener('click', e => {
-  if(is_registering){
+  if(waiting){
     onErrorMessage("Warte bis die vorherige Anfrage abgeschlossen ist.");
     return;
   }
@@ -18,13 +19,13 @@ submit.addEventListener('click', e => {
     return;
   }
 
-  is_registering = true;
-  TryAddNewUser(username, password);
+  waiting = true;
+  TryAuthentication(username, password);
 })
 
 
-async function TryAddNewUser(username, password){
-  const response = await fetch("/api/register", {
+function TryAuthentication(username, password){
+  fetch(`/api/${type}`, {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
@@ -34,21 +35,23 @@ async function TryAddNewUser(username, password){
       username: username,
       password: password
     })
+  }).then(async response =>  {
+    const data = await response.json();
+    if(!data.success) {
+      onErrorMessage(data.error);
+    } else {
+      //Create cookie
+      //Redirect
+    }
+    console.log(data);
+    waiting = false;
+  }).catch(err => {
+    onErrorMessage('Der Server ist momentan überlastet.');
+    waiting = false;
   });
-  
-  const data = await response.json();
-
-  if(!data.success) {
-    onErrorMessage(data.error);
-  } else {
-    //Create cookie
-    //Redirect
-  }
-  console.log(data);
-  is_registering = false;
 }
 
-const error_msg = document.getElementById('register_error')
+const error_msg = document.getElementById('form_error')
 let error_timeout = null;
 function onErrorMessage(msg){
   if(error_timeout) clearTimeout(error_timeout);

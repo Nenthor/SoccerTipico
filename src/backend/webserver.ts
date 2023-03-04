@@ -4,7 +4,7 @@ import os from 'os';
 import http from 'http';
 import express from 'express';
 import bodyParser from 'body-parser';
-import { registerUser } from './handleUser.js';
+import { loginUser, registerUser } from './handleUser.js';
 
 const app = express();
 const port = os.type() === 'Linux' ? 8888 : 8888;
@@ -18,7 +18,7 @@ app.use('/images', express.static(path.join(dirname, 'src/frontend/images')));
 app.use('/fonts', express.static(path.join(dirname, 'src/frontend/fonts')));
 
 app.get('/', (req, res) => {
-  fs.readFile(path.join(dirname, `src/frontend/html/index.html`), (error, data) => {
+  fs.readFile(path.join(dirname, `src/frontend/html/register.html`), (error, data) => {
     if (error) res.status(500);
     else res.write(data);
     res.end();
@@ -41,6 +41,11 @@ for (let page of pages) {
 
 app.post('/api/register', async (req, res) => {
   const response = await registerUser(req.body.username, req.body.password);
+  res.send(response);
+});
+
+app.post('/api/login', async (req, res) => {
+  const response = await loginUser(req.body.username, req.body.password);
   res.send(response);
 });
 
