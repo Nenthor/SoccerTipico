@@ -1,21 +1,27 @@
 import { User, createUser, getUser } from './database.js';
 import { timingSafeEqual, randomBytes, scryptSync } from 'crypto';
 import config from './data/config.json' assert { type: 'json' };
+import { Request } from 'express';
 
-export async function registerUser(username: string, password: string) {
+export async function registerUser(req: Request, username: string, password: string) {
   let user = new User('', username, generateHash(password), config.defaultPoints, '');
 
   user = await createUser(user);
 
-  if (user) return { success: true, username: user.username, password: user.password };
-  else return { success: false, error: 'Benutzername ist bereits vergeben.' };
+  if (user) {
+    req.session.userID = user.id; // Set Session
+    return { success: true, username: user.username };
+  } else return { success: false, error: 'Benutzername ist bereits vergeben.' };
 }
 
-export async function loginUser(username: string, password: string) {
+export async function loginUser(req: Request, username: string, password: string) {
   const user = await getUser(username);
 
-  if (checkPassword(password, user.password)) return { success: true, username: user.username, password: user.password };
-  else return { success: false, error: 'Benutzdaten stimmen nicht überein.' };
+  if (user && checkPassword(password, user.password)) {
+    req.session.userID = user.id; // Set Session
+    return { success: true, username: user.username };
+  }
+  return { success: false, error: 'Benutzdaten stimmen nicht überein.' };
 }
 
 function generateHash(input: string) {

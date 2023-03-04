@@ -44,3 +44,7 @@ function changeMenu(visible) {
         }, 600);
     }
 }
+
+//footer
+const footer_text = document.getElementById('footer_text');
+footer_text.textContent += ` | ${new Date().getFullYear()}`;

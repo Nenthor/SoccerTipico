@@ -171,3 +171,12 @@ nav {
     color: white;
   }
 }
+
+.footer {
+  height: 40px;
+  width: 100%;
+  font-family: roboto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

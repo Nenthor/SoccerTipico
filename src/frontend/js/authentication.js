@@ -1,12 +1,13 @@
 //Authentication
 const username_input = document.getElementById('username');
 const password_input = document.getElementById('password');
-const submit = document.getElementById('form_submit');
+const form = document.getElementById('form_box');
 
 const type = window.location.pathname.substring(1);
 let waiting = false;
 
-submit.addEventListener('click', e => {
+form.addEventListener('submit', e => {
+  e.preventDefault();
   if(waiting){
     onErrorMessage("Warte bis die vorherige Anfrage abgeschlossen ist.");
     return;
@@ -40,10 +41,8 @@ function TryAuthentication(username, password){
     if(!data.success) {
       onErrorMessage(data.error);
     } else {
-      //Create cookie
-      //Redirect
+      window.location.href = '/';
     }
-    console.log(data);
     waiting = false;
   }).catch(err => {
     onErrorMessage('Der Server ist momentan überlastet.');
@@ -61,7 +60,3 @@ function onErrorMessage(msg){
     error_msg.textContent = "";
   }, 5000) // 5s
 }
-
-//footer
-const footer_text = document.getElementById('footer_text');
-footer_text.textContent += ` | ${new Date().getFullYear()}`;

@@ -80,6 +80,7 @@
 #form_error {
   margin-top: 10px;
   height: 25px;
+  text-align: center;
   color: #cd3232;
 }
 
@@ -98,13 +99,4 @@
 #form_submit:hover {
   background-color: #3bc5e7;
   color: white;
-}
-
-.footer {
-  height: 40px;
-  width: 100%;
-  font-family: roboto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
