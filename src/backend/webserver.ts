@@ -14,7 +14,7 @@ import { setupWebsocket } from './websocket.js';
 
 const app = express();
 const port = os.type() === 'Linux' ? 8888 : 8888;
-const dirname = path.resolve();
+const dirname = __dirname;
 const SESSION_AGE = 1000 * 60 * 60 * 24 * 30; // 30d
 const SESSION_NAME = 'auth';
 
