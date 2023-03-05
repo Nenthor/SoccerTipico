@@ -24,7 +24,7 @@ function rotateBar(index, factor, opacity) {
 
     nav_bar[index].style.opacity = `${opacity}`;
     nav_bar[index].style.transform =
-        `translateY(${y}px) rotate(${deg}deg) `
+        `rotate(${deg}deg) translateY(${y}px) `;
 }
 
 function changeMenu(visible) {

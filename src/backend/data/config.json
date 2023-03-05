@@ -1,5 +1,5 @@
 {
-  "defaultPoints": 100,
+  "defaultPoints": 1000,
   "sessionSecret": "7ba70f1925cb77650…3bf83c171d447fe287e09b967623fc4dd1da6df3240fe5c7d",
   "PocketBase": {
     "ip": "192.168.178.48",

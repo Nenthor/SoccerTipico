@@ -3,7 +3,6 @@ import fs from 'fs';
 import os from 'os';
 import http from 'http';
 import express, { NextFunction, Request, Response } from 'express';
-import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import RedisStore from 'connect-redis';
@@ -11,6 +10,7 @@ import { createClient } from 'redis';
 import { loginUser, registerUser } from './handleUser.js';
 import config from './data/config.json' assert { type: 'json' };
 import { getUser, User } from './database.js';
+import { setupWebsocket } from './websocket.js';
 
 const app = express();
 const port = os.type() === 'Linux' ? 8888 : 8888;
@@ -28,31 +28,22 @@ declare module 'express-session' {
   }
 }
 
-app.use(bodyParser.json());
-app.use(cookieParser());
-app.use(
-  session({
-    name: SESSION_NAME,
-    store: redisStore,
-    resave: false,
-    saveUninitialized: false,
-    secret: config.sessionSecret,
-    cookie: {
-      maxAge: SESSION_AGE,
-      sameSite: true,
-      secure: false //due to http
-    }
-  })
-);
-app.use(async (req: Request, res: Response, next: NextFunction) => {
-  const { userID } = req.session;
-
-  if (userID) {
-    const user = await getUser(userID);
-    if (user) res.locals.user = user;
+const auth_session = session({
+  name: SESSION_NAME,
+  store: redisStore,
+  resave: false,
+  saveUninitialized: false,
+  secret: config.sessionSecret,
+  cookie: {
+    maxAge: SESSION_AGE,
+    sameSite: true,
+    secure: false //due to http
   }
-  next();
 });
+
+app.use(express.json());
+app.use(cookieParser());
+app.use(auth_session);
 
 app.use('/js', express.static(path.join(dirname, 'src/frontend/js')));
 app.use('/css', express.static(path.join(dirname, 'src/frontend/css')));
@@ -117,7 +108,7 @@ app.post('/api/logout', authCheck, async (req, res) => {
 
 app.post('/api/stats', authCheck, async (req, res) => {
   const user: User = res.locals.user;
-  if (user) res.send({ success: true, username: user.username, points: user.points, bet: user.bet });
+  if (user) res.send({ success: true, username: user.username, points: user.points, bet: user.bets });
   else res.send({ success: false, error: 'Benutzerdaten konnten nicht abgerufen werden.' });
 });
 
@@ -127,4 +118,5 @@ app.get('*', (req, res) => {
 });
 
 const server = http.createServer(app);
+setupWebsocket(server, auth_session);
 server.listen(port, () => console.log(`Server is listening to port ${port}`));
