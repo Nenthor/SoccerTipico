@@ -20,7 +20,7 @@ nav_toggle.addEventListener('click', () => {
 }, { passive: true });
 
 function rotateBar(index, factor, opacity) {
-    const deg = 45 * factor, y = 10 * factor;
+    const deg = 45 * factor, y = 13 * factor;
 
     nav_bar[index].style.opacity = `${opacity}`;
     nav_bar[index].style.transform =

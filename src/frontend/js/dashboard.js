@@ -67,7 +67,7 @@ function addSocketEvents() {
 function reconnect() {
   fetch(`${location.protocol}//${location.host}`, { method: 'GET' })
     .then(() => {
-      socket = new WebSocket(`ws://${location.host}`);
+      socket = new WebSocket(`wss://${location.host}`);
       addSocketEvents();
       console.log('Reconnected to Server.');
     })
@@ -115,15 +115,41 @@ function updateStats() {
 function updateOpenBets() {
   open_bets_list.innerHTML = '';
   for (const bet of open_bets) {
-    const remaining_time = ((new Date(bet.timelimit) - new Date()) / 1000 / 60).toFixed();
-    console.log(remaining_time);
-    open_bets_list.insertAdjacentHTML('beforeend', `<li class="bet_item" id="bet_open_${bet.id}"><p class="bet_item_title">${bet.question} [noch ${remaining_time} min]</p></li>`);
+    const remaining_time = ((new Date(bet.timelimit) - new Date()) / 1000).toFixed();
+    let remaining_percantage = remaining_time / 300 * 100; // 100% = 5min
+    if(remaining_percantage > 100) remaining_percantage = 100;
+
+    open_bets_list.insertAdjacentHTML('beforeend', 
+    `<li class="bet_item" id="bet_open_${bet.id}">
+      <p class="bet_item_title">${bet.question}</p>
+      <div class="bet_time" id="bet_time_${bet.id}">
+        <style>@keyframes bet_timer_${bet.id} { from { transform: translateX(-${100 - remaining_percantage}%); } to { transform: translateX(-100%); } }</style>
+      </div>
+    </li>`);
 
     const bet_element = document.getElementById(`bet_open_${bet.id}`);
     bet_element.addEventListener('click', () => onOpenBetSelect(bet.id));
+
+    if(remaining_time <= 300) {
+      const bet_time = document.getElementById(`bet_time_${bet.id}`);
+      bet_time.style.animation = `bet_timer_${bet.id} ${remaining_time}s linear 0s 1 normal forwards`;
+    }else {
+      setTimeout(() => {
+        const bet_time = document.getElementById(`bet_time_${bet.id}`);
+        if(bet_time)
+          bet_time.style.animation = `bet_timer_${bet.id} ${remaining_time}s linear 0s 1 normal forwards`;
+      }, (remaining_time - 300) * 1000);
+    }
+
+    setTimeout(() => {
+      const bet_element_check = document.getElementById(`bet_open_${bet.id}`);
+      if(bet_element_check){
+        bet_element_check.style.display = 'none';
+      }
+    }, remaining_time * 1000);
   }
 }
 
 function onOpenBetSelect(id) {
-  console.log(id);
+  window.location.href = `/bet?id=${id}`;
 }

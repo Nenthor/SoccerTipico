@@ -25,12 +25,14 @@ export class User {
 export class Bet {
   id: string;
   question: string;
-  choices: number;
+  type: string;
+  choices: string;
   timelimit: Date;
 
-  constructor(id: string, question: string, choices: number, timelimit: Date) {
+  constructor(id: string, question: string, type: string, choices: string, timelimit: Date) {
     this.id = id;
     this.question = question;
+    this.type = type;
     this.choices = choices;
     this.timelimit = timelimit;
   }
@@ -56,7 +58,7 @@ export async function getAllBets() {
 
 export async function getAllOpenBets() {
   try {
-    const date = new Date().toISOString().replace('T', ' ');
+    const date = new Date().toISOString();
     const records = await pb.collection('bets').getList(1, 50, {
       filter: `timelimit >= "${date}"`
     });
@@ -154,5 +156,6 @@ function extractBets(records: Record[]) {
 }
 
 function extractBet(record: Record) {
-  return new Bet(record.id, record.question, record.choices, record.timelimit);
+  const choices:string = record.choices.substring(1,  record.choices.length - 1);
+  return new Bet(record.id, record.question, record.type, choices, record.timelimit);
 }
