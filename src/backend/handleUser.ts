@@ -4,7 +4,7 @@ import config from './data/config.json' assert { type: 'json' };
 import { Request } from 'express';
 
 export async function registerUser(req: Request, username: string, password: string) {
-  let user = new User('', username, generateHash(password), config.defaultPoints, '');
+  let user = new User('', username, generateHash(password), config.defaultPoints, '', false);
 
   user = await createUser(user);
 

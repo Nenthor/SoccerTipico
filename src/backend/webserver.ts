@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import http from 'http';
+import https from 'https';
 import express, { NextFunction, Request, Response } from 'express';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
@@ -13,10 +13,15 @@ import { getUser, User } from './database.js';
 import { setupWebsocket } from './websocket.js';
 
 const app = express();
-const port = os.type() === 'Linux' ? 8888 : 8888;
-const dirname = __dirname;
+const port = os.type() === 'Linux' ? 443 : 8888;
+const dirname = '/home/user/SoccerTipico';
 const SESSION_AGE = 1000 * 60 * 60 * 24 * 30; // 30d
 const SESSION_NAME = 'auth';
+
+const ssl = {
+  key: fs.readFileSync(`${dirname}/src/backend/data/certificates/private.key`),
+  cert: fs.readFileSync(`${dirname}/src/backend/data/certificates/certificate.crt`)
+};
 
 const redisClient = createClient();
 redisClient.connect().catch(console.error);
@@ -37,7 +42,7 @@ const auth_session = session({
   cookie: {
     maxAge: SESSION_AGE,
     sameSite: true,
-    secure: false //due to http
+    secure: true //due to https
   }
 });
 
@@ -49,6 +54,17 @@ app.use('/js', express.static(path.join(dirname, 'src/frontend/js')));
 app.use('/css', express.static(path.join(dirname, 'src/frontend/css')));
 app.use('/images', express.static(path.join(dirname, 'src/frontend/images')));
 app.use('/fonts', express.static(path.join(dirname, 'src/frontend/fonts')));
+app.use('/fonts', express.static(path.join(dirname, 'src/frontend/fonts')));
+
+app.get('/.well-known/pki-validation/CB4B3785C4FECE3A5D5FB970F0800626.txt', (req, res) => {
+  console.log()
+  fs.readFile(path.join(dirname, `src/backend/data/ssl_check.txt`), (error, data) => {
+    if (error) res.status(500);
+    else res.write(data);
+    res.end();
+  });
+});
+
 
 const nonAuthPages = ['/register', '/login', '/api/register', '/api/login'];
 const authCheck = (req: Request, res: Response, next: NextFunction) => {
@@ -117,6 +133,6 @@ app.get('*', (req, res) => {
   res.end();
 });
 
-const server = http.createServer(app);
+const server = https.createServer(ssl, app);
 setupWebsocket(server, auth_session);
 server.listen(port, () => console.log(`Server is listening to port ${port}`));

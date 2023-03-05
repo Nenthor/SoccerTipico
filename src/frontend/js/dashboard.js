@@ -23,7 +23,7 @@ logout.addEventListener('click', () => {
 });
 
 //Server data
-var socket = new WebSocket(`ws://${location.host}`);
+var socket = new WebSocket(`wss://${location.host}`);
 let user = { username: '', points: 0, default_points: 0, bets: '' };
 let open_bets = [{ id: '', question: '', choices: 0, timelimit: new Date() }];
 

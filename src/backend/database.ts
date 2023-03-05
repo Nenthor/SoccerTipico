@@ -10,13 +10,15 @@ export class User {
   password: string;
   points: number;
   bets: string;
+  admin: boolean;
 
-  constructor(id: string, username: string, password: string, points: number, bets: string) {
+  constructor(id: string, username: string, password: string, points: number, bets: string, admin: boolean) {
     this.id = id;
     this.username = username;
     this.password = password;
     this.points = points;
     this.bets = bets;
+    this.admin = admin;
   }
 }
 
@@ -108,7 +110,8 @@ export async function createUser(user: User) {
     username: user.username,
     password: user.password,
     points: user.points,
-    bets: user.bets
+    bets: user.bets,
+    admin: user.admin
   };
   try {
     const record = await pb.collection('users').create(data);
@@ -139,7 +142,7 @@ function extractUsers(records: Record[]) {
 }
 
 function extractUser(record: Record) {
-  return new User(record.id, record.username, record.password, record.points, record.bet);
+  return new User(record.id, record.username, record.password, record.points, record.bet, record.admin);
 }
 
 function extractBets(records: Record[]) {
