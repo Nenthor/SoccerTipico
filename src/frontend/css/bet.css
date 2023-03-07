@@ -24,6 +24,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  align-content: center;
 }
 
 #bet_value{
@@ -57,4 +58,14 @@
 .bet_answer:last-child{
   border-top-right-radius: 25px;
   border-bottom-right-radius: 25px;
+}
+
+.bet_choices{
+  width: calc(100% - 40px);
+  margin: 10px 20px;
+  min-height: 200px;
+}
+
+.bet_choices_title{
+  color: white;
 }
