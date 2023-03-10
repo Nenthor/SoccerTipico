@@ -1,34 +1,38 @@
-# SoccerTipico
-Webserver, um auf Fußballspiele zu wetten
+# create-svelte
 
-## Installationsanleitung
+Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
 
-**Schritt 1:**
-Lade die LTS Version von Node.js von dieser [Website](https://nodejs.org/en/) herunter und installiere das Programm.
+## Creating a project
 
-**Schritt 2:**
-Lade dieses Projekt [hier](https://github.com/TheDavido/SoccerTipico/archive/refs/heads/main.zip) herunter.
+If you're seeing this, you've probably already done this step. Congrats!
 
-**Schritt 3:**
-Öffne im heruntergeladenem Ordner eine Befehlszeile. 
+```bash
+# create a new project in the current directory
+npm create svelte@latest
 
-**Schritt 4:**
-Installiere alle npm Packete mit ```npm install```.
+# create a new project in my-app
+npm create svelte@latest my-app
+```
 
-**Schritt 5:**
-Im Ordner ```database``` ist die ausführbare Datei ```pocketbase``` hinterlegt. Allerdings nur für linux_amd64. Sollte ein anderes Betriebssystem vorliegen, so lade die entsprechende Version von [GitHub](https://github.com/pocketbase/pocketbase/releases/) herunter und befolge die Installalationsanweisungen.
+## Developing
 
-**Schritt 6:**
-Starte den Datenbank-Server mit dem Befehl ```./pocketbase serve --http="{LOKALE ADRESSE EINFÜGEN}:8999"```. Damit das Webinterface im privaten Netzwerk ausgeführt werden kann, muss die ip hinterlegt werden. WICHTIG: Ändere ```./src/backend/data/config.json``` entsprechend und ändere die ip und den port.
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
-**Schritt 7:**
-Installiere Redis. Befolge dazu diese [Anleitung](https://redis.io/docs/getting-started/installation/).
+```bash
+npm run dev
 
-**Schritt 8:**
-Kompiliere den Server mit dem Befehl ```npm run build```.
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
+```
 
-**Schritt 9:**
-Starte den Server mit dem Befehl ```npm run start```.
+## Building
 
-**Schritt 10:**
-Habe Spaß.
+To create a production version of your app:
+
+```bash
+npm run build
+```
+
+You can preview the production build with `npm run preview`.
+
+> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.

@@ -1,0 +1,59 @@
+@font-face {
+	font-family: 'comfortaa';
+	src: url(../fonts/comfortaa/comfortaa.woff2) format('woff2'), url(../fonts/comfortaa/comfortaa.woff) format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'montserrat';
+	src: url(../fonts/montserrat/montserrat_regular.woff) format('truetype'), url(../fonts/montserrat/montserrat_regular.woff) format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'montserrat';
+	src: url(../fonts/montserrat/montserrat_semibold.woff) format('truetype'), url(../fonts/montserrat/montserrat_semibold.woff) format('woff');
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'montserrat';
+	src: url(../fonts/montserrat/montserrat_light.woff) format('truetype'), url(../fonts/montserrat/montserrat_light.woff) format('woff');
+	font-weight: 300;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'roboto';
+	src: url(../fonts/roboto/roboto.woff2) format('woff2'), url(../fonts/roboto/roboto.woff) format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	font-family: montserrat;
+}
+
+button {
+	-webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+a:visited {
+	text-decoration: none;
+}
