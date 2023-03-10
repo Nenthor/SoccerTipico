@@ -6,10 +6,8 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview --port 8080",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "prettier --plugin-search-dir . --check .",
-		"format": "prettier --plugin-search-dir . --write ."
+		"stop": "sudo systemctl stop soccer.service",
+		"restart": "sudo systemctl restart soccer.service"
 	},
 	"devDependencies": {
 		"@ethercorps/sveltekit-redis-session": "^0.1.3",
