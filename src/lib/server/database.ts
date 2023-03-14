@@ -1,3 +1,4 @@
+import type { PlacedBet } from '$lib/Types';
 import PocketBase, { ClientResponseError, Record } from 'pocketbase';
 import config from './data/config.json' assert { type: 'json' };
 
@@ -10,16 +11,16 @@ export class User {
 	username: string;
 	password: string;
 	points: number;
-	bets: string;
-	admin: boolean;
+	bets: PlacedBet[];
+	isAdmin: boolean;
 
-	constructor(id: string, username: string, password: string, points: number, bets: string, admin: boolean) {
+	constructor(id: string, username: string, password: string, points: number, bets: PlacedBet[], isAdmin: boolean) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
 		this.points = points;
 		this.bets = bets;
-		this.admin = admin;
+		this.isAdmin = isAdmin;
 	}
 }
 
@@ -57,11 +58,20 @@ export async function getAllBets() {
 
 export async function getAllOpenBets() {
 	try {
-		const date = new Date().toISOString();
+		const date = new Date().toISOString().replace('T', ' ');
 		const records = await pb.collection('bets').getList(1, 50, {
 			filter: `timelimit >= "${date}"`
 		});
 		return extractBets(records.items);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function updateBet(id: string, bet: Bet) {
+	try {
+		const record = await pb.collection('bets').update(id, bet);
+		return extractBet(record);
 	} catch (error) {
 		return null;
 	}
@@ -72,13 +82,16 @@ export async function getUser(id: string) {
 		const record = await pb.collection('users').getOne(id, { $autoCancel: false });
 		return extractUser(record);
 	} catch (error) {
+		console.log(error);
 		return null;
 	}
 }
 
 export async function getUserByName(username: string) {
 	try {
-		const record = await pb.collection('users').getFirstListItem(`username="${username}"`, { $autoCancel: false });
+		const record = await pb.collection('users').getFirstListItem(`username="${username}"`, {
+			$autoCancel: false
+		});
 		return extractUser(record);
 	} catch (error) {
 		return null;
@@ -89,6 +102,18 @@ export async function getAllUsers() {
 	try {
 		const records = await pb.collection('users').getFullList(200, { $autoCancel: false });
 		return extractUsers(records);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function getLeaders() {
+	try {
+		const records = await pb.collection('users').getList(1, 10, {
+			filter: 'isAdmin = false',
+			sort: '-points'
+		});
+		return extractUsers(records.items);
 	} catch (error) {
 		return null;
 	}
@@ -111,7 +136,7 @@ export async function createUser(username: string, password: string) {
 		username: username,
 		password: password,
 		points: config.defaultPoints,
-		bets: '{}',
+		bets: '[]',
 		isAdmin: false
 	};
 	try {

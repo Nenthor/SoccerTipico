@@ -8,7 +8,7 @@
 
 @font-face {
 	font-family: 'montserrat';
-	src: url(../fonts/montserrat/montserrat_regular.woff) format('truetype'), url(../fonts/montserrat/montserrat_regular.woff) format('woff');
+	src: url(../fonts/montserrat/montserrat_regular.woff2) format('woff2'), url(../fonts/montserrat/montserrat_regular.woff) format('woff');
 	font-weight: normal;
 	font-style: normal;
 	font-display: swap;
@@ -16,7 +16,7 @@
 
 @font-face {
 	font-family: 'montserrat';
-	src: url(../fonts/montserrat/montserrat_semibold.woff) format('truetype'), url(../fonts/montserrat/montserrat_semibold.woff) format('woff');
+	src: url(../fonts/montserrat/montserrat_semibold.woff2) format('woff2'), url(../fonts/montserrat/montserrat_semibold.woff) format('woff');
 	font-weight: 500;
 	font-style: normal;
 	font-display: swap;
@@ -52,8 +52,16 @@ body {
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
+	background-color: #161616;
 }
 
 a:visited {
 	text-decoration: none;
+}
+
+.background {
+	display: none;
+	position: absolute;
+	width: 100%;
+	height: 100%;
 }

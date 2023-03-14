@@ -22,7 +22,7 @@
 </script>
 
 <nav bind:clientWidth={total_width}>
-	<h3 id="nav_title" bind:clientWidth={title_width}>Soccer</h3>
+	<a href="/dashboard" id="title"><h3 id="nav_title" bind:clientWidth={title_width}>SoccerTipico</h3></a>
 	{#if isMobileMenu}
 		<button id="nav_toggle" on:click={onClick}>
 			<span class="nav_bar {isOpen ? 'nav_bar_open' : ''}" />
@@ -51,6 +51,10 @@
 		justify-content: space-between;
 		background-color: white;
 		z-index: 1;
+	}
+
+	#title {
+		text-decoration: none;
 	}
 
 	#nav_title {

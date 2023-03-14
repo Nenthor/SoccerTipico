@@ -1,22 +1,50 @@
 <script lang="ts">
 	import Footer from '$lib/Footer.svelte';
 	import Navbar from '$lib/Navbar.svelte';
-	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+
+	//change title
+	let r: HTMLButtonElement;
+	let l: HTMLButtonElement;
+
+	var reg = true;
+	var bga = 'rgb(255, 255, 255, 0.0)',
+		bgp = 'rgb(255, 255, 255, 0.030)',
+		tca = 'rgb(255, 255, 255)',
+		tcp = 'rgb(255, 255, 255, 0.25)';
+
+	function showfstat(state: boolean) {
+		autoFocus.focus();
+		reg = state;
+		if (reg) {
+			l.style.backgroundColor = bgp;
+			l.style.color = tcp;
+			r.style.backgroundColor = bga;
+			r.style.color = tca;
+		} else {
+			l.style.backgroundColor = bga;
+			l.style.color = tca;
+			r.style.backgroundColor = bgp;
+			r.style.color = tcp;
+		}
+	}
 
 	let autoFocus: HTMLElement;
 	onMount(() => {
 		if (autoFocus) autoFocus.focus();
+		showfstat(true);
 	});
 
-	$: isRegister = $page.url.searchParams.get('type') === 'register';
-
+	//authentication
 	let username: string;
 	let password: string;
 
 	let errorMessage = '';
 
-	async function onAuthentication(type: string) {
+	async function onAuthentication() {
+		var type = 'login';
+		if (reg) type = 'register';
+
 		if (dataIsEmpty()) return;
 
 		const res = await fetch(`/api/${type}`, {
@@ -38,7 +66,7 @@
 		if (!username || username.trim() == '' || !password || password.trim() == '') {
 			setErrorMessage('Fülle das Formular aus.');
 			return true;
-		} else if (isRegister && username.length < 3) {
+		} else if (reg && username.length < 3) {
 			setErrorMessage('Der Benutzername muss mindestens 3 Buchstaben lang sein.');
 			return true;
 		}
@@ -53,39 +81,37 @@
 	}
 </script>
 
-<Navbar>
-	<li>
-		{#if isRegister}
-			<a href="/authentication?type=login">Anmelden</a>
-		{:else}
-			<a href="/authentication?type=register">Registrieren</a>
-		{/if}
-	</li>
-</Navbar>
+<svelte:head>
+	<script defer type="text/javascript" src="/background.js"></script>
+</svelte:head>
 
-<div class="content_box">
-	<div class="form_frame">
-		<h2 class="form_title">{isRegister ? 'Registrieren' : 'Anmelden'}</h2>
-		{#if isRegister}
-			<p class="form_description">Wähle einen Benutzernamen um Wetten abschließen zu können.</p>
-		{:else}
-			<p class="form_description">Gebe dein Benutzername und Passwort ein um weiter Wetten abschließen zu können.</p>
-		{/if}
+<Navbar />
+
+<div class="content" id="content_box">
+	<div class="form">
+		<div class="titles">
+			<button class="title" bind:this={r} on:click={() => showfstat(true)}><h2>Registrieren</h2></button>
+			<button class="title" bind:this={l} on:click={() => showfstat(false)}><h2>Anmelden</h2></button>
+		</div>
 		<form id="form_box">
+			<p class="form_description">Gebe dein Benutzername und Passwort ein um weiter Wetten abschließen zu können.</p>
 			<div class="form_input_box">
 				<p class="form_input_text">Benutzername:</p>
-				<input type="text" class="form_input" autocomplete="off" maxlength="25" bind:this={autoFocus} bind:value={username} />
+				<input type="text" id="username" class="form_input" autocomplete="off" maxlength="25" placeholder="Benutzername" bind:this={autoFocus} bind:value={username} />
 			</div>
+			<br />
 			<div class="form_input_box">
 				<p class="form_input_text">Passwort:</p>
-				<input type="password" class="form_input" maxlength="25" bind:value={password} />
+				<input type="password" id="password" class="form_input" maxlength="25" placeholder="Passwort" bind:value={password} />
 			</div>
 			<p id="form_error">{errorMessage}</p>
-			{#if isRegister}
-				<button id="form_submit" on:click|preventDefault={() => onAuthentication('register')}>Registrieren</button>
-			{:else}
-				<button id="form_submit" on:click|preventDefault={() => onAuthentication('login')}>Anmelden</button>
-			{/if}
+			<button id="form_submit" on:click|preventDefault={() => onAuthentication()}>
+				{#if reg}
+					Registrieren
+				{:else}
+					Anmelden
+				{/if}
+			</button>
 		</form>
 	</div>
 </div>
@@ -93,11 +119,13 @@
 <Footer />
 
 <style>
-	.content_box {
-		margin-top: 75px;
-		padding: 20px 0;
-		width: 100%;
-		background-color: #161616;
+	:global(.background) {
+		display: block;
+	}
+
+	.content {
+		position: relative;
+		padding: 85px 0 10px 0;
 		display: flex;
 		flex-grow: 1;
 		align-items: center;
@@ -105,95 +133,88 @@
 		z-index: 0;
 	}
 
-	.form_frame {
+	.form {
+		background-color: rgba(108, 108, 108, 0.053);
+		backdrop-filter: blur(10px);
+		box-shadow: 3px 3px rgba(0, 0, 0, 0.427), 0 0 10px 5px #8000ff17;
+	}
+
+	#form_box {
 		position: relative;
-		width: clamp(350px, 65vw, 750px);
-		background-color: #323232;
-		margin: 0 10px;
-		border-radius: 30px;
+		width: clamp(350px, 70vw, 500px);
+		min-height: 400px;
+		height: fit-content;
 	}
 
-	.form_frame::before {
-		content: '';
-		position: absolute;
-		top: -4px;
-		bottom: -4px;
-		left: -4px;
-		right: -4px;
-		background-image: linear-gradient(#3bc5e7, #398dd1);
-		border-radius: 30px;
-		z-index: -1;
+	.titles {
+		width: 100%;
+		height: 60px;
 	}
 
-	.form_title {
-		color: #3bc5e7;
-		margin-top: 20px;
+	.title {
+		width: 50%;
+		height: 100%;
 		text-align: center;
-		text-shadow: 0 0 3px #398dd1;
+		float: left;
+		cursor: pointer;
+		color: #ffffff;
+		border: none;
 	}
-
+	
 	.form_description {
 		text-align: center;
 		color: white;
 		margin: 20px 10px;
 	}
 
-	#form_box {
-		width: calc(100% - 20px);
-		margin: 0 10px 20px 10px;
-		flex-grow: 1;
-		display: flex;
-		align-items: center;
-		justify-content: space-evenly;
-		flex-direction: column;
-		color: white;
-	}
-
 	.form_input_box {
 		width: calc(100% - 20px);
 		margin: 10px 0;
+		height: min-content;
 	}
 
 	.form_input_text {
+		position: relative;
+		left: 10%;
 		margin-bottom: 5px;
+		color: #ffffff;
+		font-size: 1rem;
 	}
 
 	.form_input {
-		height: 30px;
+		height: clamp(20px, 7vw, 40px);
 		margin-left: 10%;
 		width: 80%;
-		border-style: solid;
-		border: 3px solid #aaa;
-		border-radius: 10px;
+		background-color: #ffffff1f;
+		color: #ffffff;
+		font-size: 1rem;
+		border: none;
 		outline: none;
 		padding: 0 5px;
 	}
 
-	.form_input:focus {
-		border: 3px solid #3bc5e7;
-	}
-
 	#form_error {
-		margin-top: 10px;
-		height: 25px;
+		margin-top: 20px;
+		min-height: clamp(25px, 7vw, 50px);
 		text-align: center;
 		color: #cd3232;
 	}
 
 	#form_submit {
+		position: relative;
+		left: 20%;
 		width: clamp(125px, 60%, 300px);
 		height: 40px;
-		border-radius: 20px;
-		margin-top: 20px;
 		font-size: 1.02rem;
-		color: #161616;
+		background-color: #ffffff1f;
+		color: #ffffff;
 		font-weight: bold;
 		border: none;
 		cursor: pointer;
 	}
 
 	#form_submit:hover {
-		background-color: #3bc5e7;
+		background-color: #ffffff3d;
 		color: white;
 	}
 </style>
