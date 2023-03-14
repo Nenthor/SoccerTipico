@@ -6,8 +6,8 @@
 		"dev": "vite dev --host",
 		"build": "vite build",
 		"preview": "vite preview --port 8080",
-		"stop": "sudo systemctl stop soccer.service",
-		"restart": "sudo systemctl restart soccer.service"
+		"stop": "sudo systemctl stop soccertipico.service",
+		"restart": "sudo systemctl restart soccertipico.service"
 	},
 	"devDependencies": {
 		"@ethercorps/sveltekit-redis-session": "^0.1.3",
