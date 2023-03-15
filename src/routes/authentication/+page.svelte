@@ -95,15 +95,11 @@
 		</div>
 		<form id="form_box">
 			<p class="form_description">Gebe dein Benutzername und Passwort ein um weiter Wetten abschließen zu können.</p>
-			<div class="form_input_box">
-				<p class="form_input_text">Benutzername:</p>
-				<input type="text" id="username" class="form_input" autocomplete="off" maxlength="25" placeholder="Benutzername" bind:this={autoFocus} bind:value={username} />
-			</div>
-			<br />
-			<div class="form_input_box">
-				<p class="form_input_text">Passwort:</p>
-				<input type="password" id="password" class="form_input" maxlength="25" placeholder="Passwort" bind:value={password} />
-			</div>
+			<p class="form_input_text">Benutzername:</p>
+			<input type="text" id="username" class="form_input" autocomplete="off" maxlength="20" placeholder="Benutzername" bind:this={autoFocus} bind:value={username} />
+			<br>
+			<p class="form_input_text">Passwort:</p>
+			<input type="password" id="password" class="form_input" maxlength="25" placeholder="Passwort" bind:value={password} />
 			<p id="form_error">{errorMessage}</p>
 			<button id="form_submit" on:click|preventDefault={() => onAuthentication()}>
 				{#if reg}
@@ -167,22 +163,17 @@
 		margin: 20px 10px;
 	}
 
-	.form_input_box {
-		width: calc(100% - 20px);
-		margin: 10px 0;
-		height: min-content;
-	}
-
 	.form_input_text {
+		margin-top: 35px;
 		position: relative;
 		left: 10%;
-		margin-bottom: 5px;
+		margin-bottom: 10px;
 		color: #ffffff;
 		font-size: 1rem;
 	}
 
 	.form_input {
-		height: clamp(20px, 7vw, 40px);
+		height: 40px;
 		margin-left: 10%;
 		width: 80%;
 		background-color: #ffffff1f;
@@ -195,7 +186,7 @@
 
 	#form_error {
 		margin-top: 20px;
-		min-height: clamp(25px, 7vw, 50px);
+		min-height: 30px;
 		text-align: center;
 		color: #cd3232;
 	}
