@@ -10,14 +10,16 @@ export class User {
 	id: string;
 	username: string;
 	password: string;
+	total_points: number;
 	points: number;
 	bets: PlacedBet[];
 	isAdmin: boolean;
 
-	constructor(id: string, username: string, password: string, points: number, bets: PlacedBet[], isAdmin: boolean) {
+	constructor(id: string, username: string, password: string, total_points: number, points: number, bets: PlacedBet[], isAdmin: boolean) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
+		this.total_points = total_points;
 		this.points = points;
 		this.bets = bets;
 		this.isAdmin = isAdmin;
@@ -68,6 +70,18 @@ export async function getAllOpenBets() {
 	}
 }
 
+export async function getAllClosedBets() {
+	try {
+		const date = new Date().toISOString().replace('T', ' ');
+		const records = await pb.collection('bets').getList(1, 50, {
+			filter: `timelimit < "${date}"`
+		});
+		return extractBets(records.items);
+	} catch (error) {
+		return null;
+	}
+}
+
 export async function updateBet(id: string, bet: Bet) {
 	try {
 		const record = await pb.collection('bets').update(id, bet);
@@ -111,7 +125,7 @@ export async function getLeaders() {
 	try {
 		const records = await pb.collection('users').getList(1, 10, {
 			filter: 'isAdmin = false',
-			sort: '-points'
+			sort: '-total_points'
 		});
 		return extractUsers(records.items);
 	} catch (error) {
@@ -135,6 +149,7 @@ export async function createUser(username: string, password: string) {
 	const data = {
 		username: username,
 		password: password,
+		total_points: config.defaultPoints,
 		points: config.defaultPoints,
 		bets: '[]',
 		isAdmin: false
@@ -168,7 +183,7 @@ function extractUsers(records: Record[]) {
 }
 
 function extractUser(record: Record) {
-	return new User(record.id, record.username, record.password, record.points, record.bets, record.isAdmin);
+	return new User(record.id, record.username, record.password, record.total_points, record.points, record.bets, record.isAdmin);
 }
 
 function extractBets(records: Record[]) {

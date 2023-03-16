@@ -171,7 +171,7 @@
 	}
 
 	async function sendSubmitRequest(bet_id: string, choice: string, amount: string) {
-		const res = await fetch(`/api/bet/set`, { method: 'POST', headers: { bet_id, choice, amount } });
+		const res = await fetch(`/api/bet/set`, { method: 'POST', headers: { betId: bet_id, choice, amount } });
 		if (!res) {
 			setErrorMessage('Der Server ist momentan nicht erreichbar.');
 			return;
@@ -180,8 +180,12 @@
 		const result = await res.json();
 
 		if (result.success) {
-			placed_amount = parseInt(amount);
 			placed_choice = parseInt(choice);
+			total_value -= placed_amount;
+			placed_amount = parseInt(amount);
+			total_value += placed_amount;
+			values[placed_choice] += placed_amount;
+
 			setErrorMessage('Wette erfolgreich abgeschlossen.', true);
 		} else if (result.message) setErrorMessage(result.message);
 	}
@@ -189,7 +193,7 @@
 
 <Navbar>
 	<li>
-		<a href="/dashboard">Zurück</a>
+		<a href="/dashboard" on:click|preventDefault={() => location.replace('/dashboard')}>Zurück</a>
 	</li>
 </Navbar>
 
@@ -412,7 +416,6 @@
 	}
 
 	.decision_amount_box {
-		width: 100%;
 		display: flex;
 		align-items: center;
 		flex-direction: column;
@@ -490,7 +493,7 @@
 	.decision_submit {
 		margin-top: 15px;
 		padding: 7.5px 0;
-		width: clamp(100px, 75%, 300px);
+		width: clamp(100px, 100%, 350px);
 		border-radius: 15px;
 		border: none;
 		cursor: pointer;
@@ -530,6 +533,9 @@
 		}
 		.bet_choice {
 			max-width: max(100px, 80vw);
+		}
+		.decision_amount_box {
+			width: clamp(200px, 70%, 500px);
 		}
 	}
 </style>

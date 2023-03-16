@@ -97,7 +97,7 @@
 			<p class="form_description">Gebe dein Benutzername und Passwort ein um weiter Wetten abschließen zu können.</p>
 			<p class="form_input_text">Benutzername:</p>
 			<input type="text" id="username" class="form_input" autocomplete="off" maxlength="20" placeholder="Benutzername" bind:this={autoFocus} bind:value={username} />
-			<br>
+			<br />
 			<p class="form_input_text">Passwort:</p>
 			<input type="password" id="password" class="form_input" maxlength="25" placeholder="Passwort" bind:value={password} />
 			<p id="form_error">{errorMessage}</p>
@@ -156,7 +156,7 @@
 		color: #ffffff;
 		border: none;
 	}
-	
+
 	.form_description {
 		text-align: center;
 		color: white;

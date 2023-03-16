@@ -1,15 +1,13 @@
 import { getBet, getUser, updateBet, updateUser } from '$lib/server/database';
-import type { PlacedBet } from '$lib/Types';
-import { timingSafeEqual, scryptSync } from 'crypto';
 import type { RequestHandler } from './$types';
 
 export const POST = (async ({ request, locals }) => {
-	const bet_id = request.headers.get('bet_id');
+	const bet_id = request.headers.get('betId');
 	const choice_index_str = request.headers.get('choice');
 	const amount_str = request.headers.get('amount');
 
 	if (!bet_id || !choice_index_str || !amount_str || !checkData(bet_id, choice_index_str, amount_str)) {
-		return getResponse(false, 'Ungültige Wettdaten.');
+		return getResponse(false, `Ungültige Wettdaten. ${request.headers.get('bet_id')}`);
 	}
 
 	const choice_index = parseInt(choice_index_str);

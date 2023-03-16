@@ -4,7 +4,12 @@ export interface User {
 	bets: PlacedBet[];
 	points: number;
 	default_points: number;
-	/*isAdmin: boolean;*/
+	isAdmin: boolean;
+}
+
+export interface Leader {
+	username: string;
+	total_points: number;
 }
 
 export interface Bet {

@@ -44,10 +44,6 @@
 	font-family: montserrat;
 }
 
-button {
-	-webkit-tap-highlight-color: rgba(255, 255, 255, 0);
-}
-
 body {
 	display: flex;
 	flex-direction: column;
@@ -57,6 +53,19 @@ body {
 
 a:visited {
 	text-decoration: none;
+}
+
+div, button{
+	-webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+h1, h2, h3, h4, h5{
+	-webkit-user-select: text;
+	-ms-user-select: text;
+	user-select: text;
 }
 
 .background {

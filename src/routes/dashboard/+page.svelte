@@ -11,6 +11,7 @@
 	let placed_value = 0;
 	let profit = 0;
 	let open_bets: Bet[];
+	let closed_bets: Bet[];
 	const number_format = new Intl.NumberFormat();
 
 	if (data.success && data.user) {
@@ -25,11 +26,15 @@
 		if (data.open_bets) {
 			open_bets = JSON.parse(data.open_bets);
 		}
+		if (data.closed_bets) {
+			closed_bets = JSON.parse(data.closed_bets);
+		}
 	}
 
 	const date = new Date();
 	date.setSeconds(date.getSeconds() + 10);
 
+	let closed_bet_elements: { [id: string]: HTMLElement } = {};
 	let open_bet_elements: { [id: string]: HTMLElement } = {};
 	$: for (const index in open_bet_elements) {
 		const element = open_bet_elements[index];
@@ -48,6 +53,7 @@
 		}
 
 		element.innerHTML = `<div><style>@keyframes bet_timer_${bet.id} { from { transform: translateX(-${100 - (time_diff / 300) * 100}%); } to { transform: translateX(-100%); } }</style></div>`;
+		element.style.width = '100%';
 		element.style.animation = `bet_timer_${bet.id} ${time_diff}s linear ${delay}s 1 normal forwards`;
 
 		element.parentElement?.addEventListener('click', () => {
@@ -56,11 +62,23 @@
 
 		setTimeout(() => {
 			element.parentNode?.parentNode?.removeChild(element.parentNode);
+			const i = open_bets.indexOf(bet);
+			if (i != -1) {
+				closed_bets.push(open_bets.splice(i, 1)[0]);
+				closed_bets = closed_bets; // Force Update
+				open_bets = open_bets; // Force Update
+			}
 		}, (time_diff + delay) * 1000);
 	}
 
-	function addBet(){
-		window.location.href = `/bet?id=new`;
+	$: for (const index in closed_bet_elements) {
+		const element = closed_bet_elements[index];
+		const bet = closed_bets.find((e) => e.id == index);
+		if (!element || !bet) continue;
+
+		element.parentElement?.addEventListener('click', () => {
+			window.location.href = `/bet?id=${bet.id}`;
+		});
 	}
 
 	async function onLogout() {
@@ -75,6 +93,10 @@
 		if (result.success) {
 			window.location.href = '/authentication';
 		} else if (result.message) console.error(result.message);
+	}
+
+	function hasPlacedBet(bet: Bet) {
+		return user.bets.find((b) => b.id == bet.id) != undefined;
 	}
 </script>
 
@@ -103,19 +125,24 @@
 	</ul>
 	<div class="bet">
 		<h2 class="bet_title">Offene Wetten:</h2>
-		<ul class="bet_open" id="open_bets">
-			<!-- 
-				{#if user.isAdmin}
-				<!- - svelte-ignore a11y-click-events-have-key-events - ->
-				<li class="bet_item"  on:click={addBet}>
-					<p class="bet_item_title">Wette hinzufügen</p>
-				</li>
-			{/if} -->
+		<ul class="bet_list" id="open_bets">
 			{#each open_bets as bet}
 				<li class="bet_item">
 					<p class="bet_item_title">{bet.question}</p>
 					<div class="bet_time" bind:this={open_bet_elements[bet.id]} />
 				</li>
+			{/each}
+		</ul>
+		<span class="bet_span" />
+		<h2 class="bet_title">Ausstehenden Wetten:</h2>
+		<ul class="bet_list">
+			{#each closed_bets as bet}
+				{#if hasPlacedBet(bet)}
+					<li class="bet_item">
+						<p class="bet_item_title">{bet.question}</p>
+						<div class="bet_time" bind:this={closed_bet_elements[bet.id]} />
+					</li>
+				{/if}
 			{/each}
 		</ul>
 	</div>
@@ -128,7 +155,6 @@
 		margin-top: 75px;
 		padding: 20px 0;
 		width: 100%;
-		/*background-color: #161616;*/
 		display: flex;
 		flex-grow: 1;
 		flex-direction: column;
@@ -207,7 +233,15 @@
 		margin-bottom: 20px;
 	}
 
-	.bet_open {
+	.bet_span {
+		margin: 30px 0;
+		background-color: #555;
+		width: 60%;
+		height: 4px;
+		border-radius: 5px;
+	}
+
+	.bet_list {
 		width: clamp(100px, 80%, 1000px);
 		background-color: #323232;
 		padding: 5px;
@@ -216,6 +250,7 @@
 		overflow-y: auto;
 		list-style: none;
 		border-radius: 25px;
+		margin-bottom: 10px;
 	}
 
 	.bet_item {
@@ -251,7 +286,7 @@
 
 	.bet_time {
 		position: absolute;
-		width: 100%;
+		width: 0%;
 		height: 5px;
 		bottom: 0;
 		border-radius: 25px;

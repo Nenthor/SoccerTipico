@@ -9,15 +9,17 @@ declare global {
 			userID: string;
 			username: string;
 			bets: PlacedBet[];
+			total_points: number;
 			points: number;
 			default_points: number;
-			/*isAdmin: boolean;*/
+			isAdmin: boolean;
 		}
 		interface PageData {
 			success: boolean;
 			user?: string;
 			bet?: string;
 			open_bets?: string;
+			closed_bets?: string;
 		}
 		// interface Platform {}
 	}

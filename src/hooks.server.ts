@@ -31,9 +31,10 @@ export const handle: Handle = (async ({ event, resolve }) => {
 				userID: user.id,
 				username: user.username,
 				bets: user.bets,
+				total_points: user.total_points,
 				points: user.points,
 				default_points: config.defaultPoints,
-				/*isAdmin: user.isAdmin*/
+				isAdmin: user.isAdmin
 			};
 		}
 	}
