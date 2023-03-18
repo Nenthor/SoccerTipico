@@ -4,13 +4,12 @@ import viteCompression from 'vite-plugin-compression';
 import fs from 'fs';
 
 export default defineConfig({
-
 	server: {
 		port: 8080, // will re-route to 443
 		https: {
 			key: fs.readFileSync('./src/lib/server/data/private.pem'),
 			cert: fs.readFileSync('./src/lib/server/data/certificate.cer')
-		},
+		}
 	},
 	plugins: [sveltekit(), viteCompression()]
 });

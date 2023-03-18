@@ -15,6 +15,7 @@
 		"@sveltejs/adapter-node": "^1.2.2",
 		"@sveltejs/kit": "^1.5.0",
 		"@types/node": "^18.14.6",
+		"@types/ws": "^8.5.4",
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.8.1",
 		"svelte": "^3.54.0",
@@ -26,11 +27,9 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"dotenv": "^16.0.3",
-		"fs": "^0.0.1-security",
 		"ioredis": "^5.3.1",
-		"json5": "^2.2.3",
 		"pocketbase": "^0.12.0",
-		"vite-plugin-compression": "^0.5.1"
+		"vite-plugin-compression": "^0.5.1",
+		"ws": "^8.13.0"
 	}
 }

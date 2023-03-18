@@ -15,7 +15,7 @@ const options = {
 		path: '/',
 		maxAge: MAX_AGE,
 		sameSite: true,
-		secure: false //due to https
+		secure: true //due to https
 	}
 };
 

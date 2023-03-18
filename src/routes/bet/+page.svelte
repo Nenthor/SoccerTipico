@@ -3,6 +3,7 @@
 	import Navbar from '$lib/Navbar.svelte';
 	import type { PageData } from './$types';
 	import type { Bet, User } from '$lib/Types';
+	import { onMount } from 'svelte';
 
 	export let data: PageData;
 
@@ -24,6 +25,27 @@
 	let choices_elements: { [id: string]: HTMLElement } = {};
 	let choices_images: { [id: string]: HTMLImageElement } = {};
 	let bet_state = 'Geöffnet';
+
+	let socket: WebSocket;
+	onMount(() => {
+		const port = parseInt(location.port) - 10;
+		const url = `wss://${location.hostname}:${isNaN(port) ? 8070 : port}${location.pathname}${location.search}`;
+		socket = new WebSocket(url);
+
+		socket.addEventListener('message', (message) => {
+			if (!message.data) return;
+			const msg: string[] = message.data.split(':');
+			console.log(msg);
+			switch (msg[0]) {
+				case 'bet_new': //TODO: Set cases
+					break;
+				case 'bet_result':
+					break;
+				default:
+					break;
+			}
+		});
+	});
 
 	if (data.success && data.bet && data.user) {
 		let bet: Bet = JSON.parse(data.bet);

@@ -3,6 +3,7 @@
 	import Navbar from '$lib/Navbar.svelte';
 	import type { PageData } from './$types';
 	import type { User, Bet } from '$lib/Types';
+	import { onMount } from 'svelte';
 
 	export let data: PageData;
 
@@ -13,6 +14,27 @@
 	let open_bets: Bet[];
 	let closed_bets: Bet[];
 	const number_format = new Intl.NumberFormat();
+
+	let socket: WebSocket;
+	onMount(() => {
+		const port = parseInt(location.port) - 10;
+		const url = `wss://${location.hostname}:${isNaN(port) ? 8070 : port}${location.pathname}${location.search}`;
+		socket = new WebSocket(url);
+
+		socket.addEventListener('message', (message) => {
+			if (!message.data) return;
+			const msg: string[] = message.data.split(':');
+			console.log(msg);
+			switch (msg[0]) {
+				case 'bet_new': //TODO: Set cases
+					break;
+				case 'bet_result':
+					break;
+				default:
+					break;
+			}
+		});
+	});
 
 	if (data.success && data.user) {
 		user = JSON.parse(data.user);
@@ -134,7 +156,7 @@
 			{/each}
 		</ul>
 		<span class="bet_span" />
-		<h2 class="bet_title">Ausstehenden Wetten:</h2>
+		<h2 class="bet_title">Ausstehende Wetten:</h2>
 		<ul class="bet_list">
 			{#each closed_bets as bet}
 				{#if hasPlacedBet(bet)}

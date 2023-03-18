@@ -36,7 +36,7 @@ export const POST = (async ({ request, locals }) => {
 		user.bets.push({ id: bet_id, choice: choice_index, value: amount });
 	}
 
-	user.points -= amount;
+	user.points -= amount - previous_amount;
 
 	for (const key in choice) {
 		choice[key] += amount - previous_amount;

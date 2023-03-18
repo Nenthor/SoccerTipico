@@ -4,7 +4,7 @@ import config from './data/config.json' assert { type: 'json' };
 
 const pb = new PocketBase(`http://${config.PocketBase.ip}:${config.PocketBase.port}`);
 await pb.admins.authWithPassword(config.PocketBase.email, config.PocketBase.password);
-console.log('Connected to PocketBase.');
+console.log('Connected to PocketBase');
 
 export class User {
 	id: string;

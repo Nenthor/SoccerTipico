@@ -1,5 +1,5 @@
 <footer>
-	<p>SoccerTipico | {new Date().getFullYear()}</p>
+	<p>SoccerTipico | <a href="/datenschutz" on:click|preventDefault={() => location.replace('/datenschutz')}>Datenschutz</a></p>
 </footer>
 
 <style>
@@ -16,5 +16,11 @@
 		font-family: roboto;
 		font-size: 0.95rem;
 		color: #161616;
+	}
+	footer a {
+		font-family: roboto;
+		font-size: 0.95rem;
+		color: #2975b3;
+		text-decoration: none;
 	}
 </style>

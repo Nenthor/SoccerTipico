@@ -36,7 +36,9 @@
 	});
 
 	//authentication
-	let username: string;
+	let firstname: string;
+	let lastname: string;
+	lastname = 'nicht löschen';
 	let password: string;
 
 	let errorMessage = '';
@@ -49,7 +51,7 @@
 
 		const res = await fetch(`/api/${type}`, {
 			method: 'POST',
-			headers: { username: username, password: password }
+			headers: { username: firstname, password: password }
 		});
 		if (!res) {
 			setErrorMessage('Der Server ist momentan nicht erreichbar.');
@@ -63,11 +65,14 @@
 	}
 
 	function dataIsEmpty() {
-		if (!username || username.trim() == '' || !password || password.trim() == '') {
+		if (!firstname || firstname.trim() == '' || !lastname || lastname.trim() == '' || !password || password.trim() == '') {
 			setErrorMessage('Fülle das Formular aus.');
 			return true;
-		} else if (reg && username.length < 3) {
-			setErrorMessage('Der Benutzername muss mindestens 3 Buchstaben lang sein.');
+		} else if (reg && firstname.length < 3) {
+			setErrorMessage('Der Vorname muss mindestens 3 Buchstaben lang sein.');
+			return true;
+		} else if (reg && lastname.length < 3) {
+			setErrorMessage('Der Nachname muss mindestens 3 Buchstaben lang sein.');
 			return true;
 		}
 		return false;
@@ -95,8 +100,11 @@
 		</div>
 		<form id="form_box">
 			<p class="form_description">Gebe dein Benutzername und Passwort ein um weiter Wetten abschließen zu können.</p>
-			<p class="form_input_text">Benutzername:</p>
-			<input type="text" id="username" class="form_input" autocomplete="off" maxlength="20" placeholder="Benutzername" bind:this={autoFocus} bind:value={username} />
+			<p class="form_input_text">Vornamen:</p>
+			<input type="text" id="firstname" class="form_input" autocomplete="off" maxlength="20" placeholder="Vorname" bind:this={autoFocus} bind:value={firstname} />
+			<br />
+			<p class="form_input_text">Nachname:</p>
+			<input type="text" id="lastname" class="form_input" autocomplete="off" maxlength="20" placeholder="Nachname" bind:this={autoFocus} bind:value={lastname} />
 			<br />
 			<p class="form_input_text">Passwort:</p>
 			<input type="password" id="password" class="form_input" maxlength="25" placeholder="Passwort" bind:value={password} />
@@ -138,7 +146,7 @@
 	#form_box {
 		position: relative;
 		width: clamp(350px, 70vw, 500px);
-		min-height: 400px;
+		min-height: 500px;
 		height: fit-content;
 	}
 

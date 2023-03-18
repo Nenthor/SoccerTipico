@@ -6,5 +6,6 @@
     "port": "8090",
     "email": "admin@kingronaldo.de",
     "password": "#BestePasswort"
-  }
+  },
+  "path": "/home/ronaldo/SoccerTipico"
 }
