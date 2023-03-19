@@ -2,7 +2,7 @@
 	import Footer from '$lib/Footer.svelte';
 	import Navbar from '$lib/Navbar.svelte';
 	import type { PageData } from './$types';
-	import type { User, Bet } from '$lib/Types';
+	import type { User, Bet, BetResult } from '$lib/Types';
 	import { onMount } from 'svelte';
 
 	export let data: PageData;
@@ -11,24 +11,61 @@
 
 	let placed_value = 0;
 	let profit = 0;
-	let open_bets: Bet[];
-	let closed_bets: Bet[];
+	let open_bets: Bet[] = [];
+	let closed_bets: Bet[] = [];
 	const number_format = new Intl.NumberFormat();
 
-	let socket: WebSocket;
+	let socket: WebSocket | null;
 	onMount(() => {
 		const port = parseInt(location.port) - 10;
 		const url = `wss://${location.hostname}:${isNaN(port) ? 8070 : port}${location.pathname}${location.search}`;
 		socket = new WebSocket(url);
 
+		socket.addEventListener('close', () => (socket = null));
+
 		socket.addEventListener('message', (message) => {
 			if (!message.data) return;
-			const msg: string[] = message.data.split(':');
-			console.log(msg);
+			const msg: string[] = message.data.split('==');
+
 			switch (msg[0]) {
-				case 'bet_new': //TODO: Set cases
+				case 'bet_new':
+					const new_bet: Bet = JSON.parse(msg[1]);
+					if (!new_bet) break;
+
+					if (new Date(new_bet.timelimit).getTime() > new Date().getTime()) {
+						open_bets.push(new_bet);
+						open_bets = open_bets;
+					} else {
+						closed_bets.push(new_bet);
+						closed_bets = closed_bets;
+					}
 					break;
 				case 'bet_result':
+					const bet_result: BetResult = JSON.parse(msg[1]);
+					const index = user.bets.findIndex((b) => b.id == bet_result.id);
+					if (index == -1) break;
+
+					const placed_bet = user.bets[index];
+
+					placed_value -= placed_bet.value;
+					profit -= placed_bet.value;
+					if (placed_bet.choice == bet_result.choice) {
+						//User has won bet
+						const winnings = Math.ceil((placed_bet.value / bet_result.bet_value) * bet_result.pot_value);
+						user.points += winnings;
+						profit += winnings;
+					}
+
+					const open_index = open_bets.findIndex((b) => b.id == bet_result.id);
+					const closed_index = closed_bets.findIndex((b) => b.id == bet_result.id);
+					if (open_index != -1) {
+						open_bets.splice(open_index, 1);
+						open_bets = open_bets;
+					} else if (closed_index != -1) {
+						closed_bets.splice(closed_index, 1);
+						closed_bets = closed_bets;
+					}
+					user.bets.splice(index, 1);
 					break;
 				default:
 					break;
@@ -38,7 +75,6 @@
 
 	if (data.success && data.user) {
 		user = JSON.parse(data.user);
-
 		for (const bet of user.bets) {
 			placed_value += bet.value;
 		}
@@ -123,7 +159,10 @@
 </script>
 
 <Navbar>
-	<li><a href="/leaderboard">Rangliste</a></li>
+	{#if user.isAdmin}
+		<li><a href="/admin" on:click|preventDefault={() => location.replace('/admin')}>Admin</a></li>
+	{/if}
+	<li><a href="/leaderboard" on:click|preventDefault={() => location.replace('/leaderboard')}>Rangliste</a></li>
 	<li>
 		<a href="/authentication" on:click|preventDefault={onLogout}>Abmelden</a>
 	</li>

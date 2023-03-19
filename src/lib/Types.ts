@@ -24,3 +24,10 @@ export interface PlacedBet {
 	choice: number;
 	value: number;
 }
+
+export interface BetResult {
+	id: string;
+	choice: number;
+	pot_value: number;
+	bet_value: number;
+}

@@ -25,21 +25,36 @@
 	let choices_elements: { [id: string]: HTMLElement } = {};
 	let choices_images: { [id: string]: HTMLImageElement } = {};
 	let bet_state = 'Geöffnet';
-
-	let socket: WebSocket;
+	let refresh_bet_rate = false;
+	let socket: WebSocket | null;
 	onMount(() => {
 		const port = parseInt(location.port) - 10;
 		const url = `wss://${location.hostname}:${isNaN(port) ? 8070 : port}${location.pathname}${location.search}`;
 		socket = new WebSocket(url);
 
+		socket.addEventListener('close', () => (socket = null));
+
 		socket.addEventListener('message', (message) => {
 			if (!message.data) return;
-			const msg: string[] = message.data.split(':');
-			console.log(msg);
+			const msg: string[] = message.data.split('==');
+
 			switch (msg[0]) {
-				case 'bet_new': //TODO: Set cases
-					break;
-				case 'bet_result':
+				case 'bet_rate':
+					const new_choices = JSON.parse(msg[1]);
+					if (!new_choices) break;
+					refresh_bet_rate = false;
+					total_value = 0;
+					for (let index in new_choices) {
+						Object.entries(new_choices[index]).forEach(([key, value]) => {
+							const new_value = parseInt(`${value}`);
+							const i = choices.indexOf(key);
+							if (i != -1) {
+								total_value += new_value;
+								values[i] = new_value;
+							}
+						});
+					}
+					values = values;
 					break;
 				default:
 					break;
@@ -193,6 +208,7 @@
 	}
 
 	async function sendSubmitRequest(bet_id: string, choice: string, amount: string) {
+		refresh_bet_rate = true;
 		const res = await fetch(`/api/bet/set`, { method: 'POST', headers: { betId: bet_id, choice, amount } });
 		if (!res) {
 			setErrorMessage('Der Server ist momentan nicht erreichbar.');
@@ -203,13 +219,17 @@
 
 		if (result.success) {
 			placed_choice = parseInt(choice);
-			total_value -= placed_amount;
+			if (refresh_bet_rate) {
+				total_value += placed_amount;
+				values[placed_choice] += placed_amount;
+				total_value -= placed_amount;
+			}
+			placed_choice = parseInt(choice);
 			placed_amount = parseInt(amount);
-			total_value += placed_amount;
-			values[placed_choice] += placed_amount;
 
 			setErrorMessage('Wette erfolgreich abgeschlossen.', true);
 		} else if (result.message) setErrorMessage(result.message);
+		refresh_bet_rate = false;
 	}
 </script>
 

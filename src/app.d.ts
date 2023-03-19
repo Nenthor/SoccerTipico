@@ -12,6 +12,7 @@ declare global {
 			total_points: number;
 			points: number;
 			default_points: number;
+			isBanned: boolean;
 			isAdmin: boolean;
 		}
 		interface PageData {

@@ -3,6 +3,8 @@ import https from 'https';
 import type { WebSocketServer, WebSocket } from 'ws';
 import { readFileSync } from 'fs';
 import config from './data/config.json' assert { type: 'json' };
+import { getLeaders } from './database';
+import type { Leader } from '$lib/Types';
 
 let wss: WebSocketServer;
 
@@ -49,7 +51,7 @@ function storeSocket(ws: WebSocket, array: WebSocket[]) {
 	array.push(ws);
 	ws.addListener('close', () => {
 		const i = array.indexOf(ws);
-		if (i != -1) array.slice(i, 1);
+		if (i != -1) array.splice(i, 1);
 	});
 }
 
@@ -60,6 +62,11 @@ export function sendAll(message: string) {
 	});
 }
 
+/**
+ * Send messages to all Dashboard clients
+ * @param message - `bet_new==[type Bet]`
+ * @param message - `bet_result==[type BetResult]`
+ */
 export function sendToDashboard(message: string) {
 	if (!wss) return;
 	for (const ws of dashboard_sockets) {
@@ -67,6 +74,10 @@ export function sendToDashboard(message: string) {
 	}
 }
 
+/**
+ * Send messages to all leaderboard clients
+ * @param message - `leaderboard==[type Leaders[]]`
+ */
 export function sendToLeaderboard(message: string) {
 	if (!wss) return;
 	for (const ws of leaderboard_sockets) {
@@ -74,6 +85,11 @@ export function sendToLeaderboard(message: string) {
 	}
 }
 
+/**
+ * Send messages to all bet clients with same bet_id
+ * @param bet_id - Unique betId
+ * @param message - `bet_rate==[type bet.choices[]]`
+ */
 export function sendToBet(bet_id: string, message: string) {
 	if (!wss || !bet_sockets[bet_id]) return;
 	for (const ws of bet_sockets[bet_id]) {
@@ -86,5 +102,13 @@ export function clearWebsocketBet(bet_id: string) {
 	for (const ws of bet_sockets[bet_id]) {
 		if (ws.OPEN) ws.close();
 	}
-	bet_sockets[bet_id].slice();
+	bet_sockets[bet_id].splice(0, bet_sockets[bet_id].length);
+}
+
+export async function updateLeaderboard() {
+	const leaders = await getLeaders(true);
+	if (!leaders) return;
+	let leaders_safe: Leader[] = [];
+	for (const leader of leaders) leaders_safe.push({ username: leader.username, total_points: leader.total_points });
+	sendToLeaderboard(`leaderboard==${JSON.stringify(leaders_safe)}`);
 }

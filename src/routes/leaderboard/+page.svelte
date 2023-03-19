@@ -2,12 +2,39 @@
 	import Footer from '$lib/Footer.svelte';
 	import Navbar from '$lib/Navbar.svelte';
 	import type { Leader } from '$lib/Types';
+	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
 	let leaders: Leader[];
 	const number_format = new Intl.NumberFormat();
+
+	let socket: WebSocket | null;
+	onMount(() => {
+		const port = parseInt(location.port) - 10;
+		const url = `wss://${location.hostname}:${isNaN(port) ? 8070 : port}${location.pathname}${location.search}`;
+		socket = new WebSocket(url);
+
+		socket.addEventListener('close', () => (socket = null));
+
+		socket.addEventListener('message', (message) => {
+			if (!message.data) return;
+			const msg: string[] = message.data.split('==');
+
+			switch (msg[0]) {
+				case 'leaderboard':
+					const new_leaders: Leader[] = JSON.parse(msg[1]);
+					if (new_leaders && new_leaders.length < 10) {
+						new_leaders.push(...Array(10 - new_leaders.length).fill({ username: '-', total_points: 0 }));
+					}
+					if (new_leaders) leaders = new_leaders;
+					break;
+				default:
+					break;
+			}
+		});
+	});
 
 	if (data.success && data.leaders) {
 		leaders = JSON.parse(data.leaders);

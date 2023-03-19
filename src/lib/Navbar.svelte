@@ -2,6 +2,7 @@
 	import { fly } from 'svelte/transition';
 
 	let isOpen = false;
+	let is_loading = true;
 	function onClick() {
 		isOpen = !isOpen;
 	}
@@ -18,6 +19,7 @@
 
 		if (title_width + list_width >= total_width) isMobileMenu = true;
 		else isMobileMenu = false;
+		is_loading = false;
 	}
 </script>
 
@@ -35,7 +37,7 @@
 			</ul>
 		{/if}
 	{:else}
-		<ul id="nav_list" bind:clientWidth={list_width}>
+		<ul class={is_loading ? 'loading' : ''} id="nav_list" bind:clientWidth={list_width}>
 			<slot />
 		</ul>
 	{/if}
@@ -69,6 +71,11 @@
 
 	#nav_list {
 		list-style: none;
+		color: #161616;
+	}
+
+	.loading {
+		color: white !important;
 	}
 
 	#nav_toggle {
@@ -124,13 +131,13 @@
 		transition: transform 0.3s ease;
 	}
 
-	:global(.nav_item:hover) {
+	:global(#nav_item:hover) {
 		transform: translateY(4px);
 	}
 
 	:global(#nav_list li a) {
 		text-decoration: none;
-		color: #161616;
+		color: inherit;
 		font-size: 1.25rem;
 		text-align: center;
 		font-weight: normal;

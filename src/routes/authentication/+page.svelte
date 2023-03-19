@@ -104,7 +104,7 @@
 			<input type="text" id="firstname" class="form_input" autocomplete="off" maxlength="20" placeholder="Vorname" bind:this={autoFocus} bind:value={firstname} />
 			<br />
 			<p class="form_input_text">Nachname:</p>
-			<input type="text" id="lastname" class="form_input" autocomplete="off" maxlength="20" placeholder="Nachname" bind:this={autoFocus} bind:value={lastname} />
+			<input type="text" id="lastname" class="form_input" autocomplete="off" maxlength="20" placeholder="Nachname" bind:value={lastname} />
 			<br />
 			<p class="form_input_text">Passwort:</p>
 			<input type="password" id="password" class="form_input" maxlength="25" placeholder="Passwort" bind:value={password} />

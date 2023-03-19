@@ -13,15 +13,17 @@ export class User {
 	total_points: number;
 	points: number;
 	bets: PlacedBet[];
+	isBanned: boolean;
 	isAdmin: boolean;
 
-	constructor(id: string, username: string, password: string, total_points: number, points: number, bets: PlacedBet[], isAdmin: boolean) {
+	constructor(id: string, username: string, password: string, total_points: number, points: number, bets: PlacedBet[], isBanned: boolean, isAdmin: boolean) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
 		this.total_points = total_points;
 		this.points = points;
 		this.bets = bets;
+		this.isBanned = isBanned;
 		this.isAdmin = isAdmin;
 	}
 }
@@ -49,6 +51,15 @@ export async function getBet(id: string) {
 	}
 }
 
+export async function getBetByQuestion(question: string) {
+	try {
+		const record = await pb.collection('bets').getFirstListItem(`question="${question}"`, { $autoCancel: false });
+		return extractBet(record);
+	} catch (error) {
+		return null;
+	}
+}
+
 export async function getAllBets() {
 	try {
 		const records = await pb.collection('bets').getFullList(200, { $autoCancel: false });
@@ -61,10 +72,11 @@ export async function getAllBets() {
 export async function getAllOpenBets() {
 	try {
 		const date = new Date().toISOString().replace('T', ' ');
-		const records = await pb.collection('bets').getList(1, 50, {
-			filter: `timelimit >= "${date}"`
+		const records = await pb.collection('bets').getFullList(100, {
+			filter: `timelimit >= "${date}"`,
+			$autoCancel: false
 		});
-		return extractBets(records.items);
+		return extractBets(records);
 	} catch (error) {
 		return null;
 	}
@@ -73,10 +85,11 @@ export async function getAllOpenBets() {
 export async function getAllClosedBets() {
 	try {
 		const date = new Date().toISOString().replace('T', ' ');
-		const records = await pb.collection('bets').getList(1, 50, {
-			filter: `timelimit < "${date}"`
+		const records = await pb.collection('bets').getFullList(100, {
+			filter: `timelimit < "${date}"`,
+			$autoCancel: false
 		});
-		return extractBets(records.items);
+		return extractBets(records);
 	} catch (error) {
 		return null;
 	}
@@ -88,6 +101,38 @@ export async function updateBet(id: string, bet: Bet) {
 		return extractBet(record);
 	} catch (error) {
 		return null;
+	}
+}
+
+export async function createBet(question: string, choices: string[], timelimit: Date) {
+	const choices_obj: any[] = [];
+	for (const choice of choices) {
+		choices_obj.push({ [choice]: 0 });
+	}
+	timelimit.setHours(timelimit.getHours() - 1);
+
+	const data = {
+		question,
+		choices: JSON.stringify(choices_obj),
+		timelimit
+	};
+	try {
+		const record = await pb.collection('bets').create(data);
+		return extractBet(record);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function deleteBet(bet: Bet) {
+	try {
+		await pb.collection('bets').delete(bet.id);
+		return true;
+	} catch (error) {
+		if (error instanceof ClientResponseError && error.status == 404) {
+			return true;
+		}
+		return false;
 	}
 }
 
@@ -121,16 +166,29 @@ export async function getAllUsers() {
 	}
 }
 
-export async function getLeaders() {
+let leaders: User[];
+export async function getLeaders(flush: boolean = false) {
+	if (leaders && !flush) return leaders;
 	try {
 		const records = await pb.collection('users').getList(1, 10, {
-			filter: 'isAdmin = false',
-			sort: '-total_points'
+			filter: 'isAdmin = false && isBanned = false',
+			sort: '-total_points,username'
 		});
-		return extractUsers(records.items);
+		leaders = extractUsers(records.items);
+		return leaders;
 	} catch (error) {
 		return null;
 	}
+}
+
+export function isLeader(user: User) {
+	if (!leaders) return false;
+	return leaders.find((leader) => user.id == leader.id) != undefined;
+}
+
+export function getLowestLeader() {
+	if (!leaders || leaders.length < 10) return null;
+	return leaders[leaders.length - 1];
 }
 
 export async function updateUser(id: string, user: User) {
@@ -152,6 +210,7 @@ export async function createUser(username: string, password: string) {
 		total_points: config.defaultPoints,
 		points: config.defaultPoints,
 		bets: '[]',
+		isBanned: false,
 		isAdmin: false
 	};
 	try {
@@ -183,7 +242,7 @@ function extractUsers(records: Record[]) {
 }
 
 function extractUser(record: Record) {
-	return new User(record.id, record.username, record.password, record.total_points, record.points, record.bets, record.isAdmin);
+	return new User(record.id, record.username, record.password, record.total_points, record.points, record.bets, record.isBanned, record.isAdmin);
 }
 
 function extractBets(records: Record[]) {

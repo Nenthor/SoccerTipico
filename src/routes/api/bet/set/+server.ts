@@ -1,13 +1,17 @@
-import { getBet, getUser, updateBet, updateUser } from '$lib/server/database';
+import { Bet, getBet, getUser, updateBet, updateUser } from '$lib/server/database';
 import type { RequestHandler } from './$types';
+import config from '$lib/server/data/config.json' assert { type: 'json' };
+import { sendToBet } from '$lib/server/websocket';
 
+let cooldown: { [key: string]: boolean } = {};
+let update: { [key: string]: Bet | null } = {};
 export const POST = (async ({ request, locals }) => {
 	const bet_id = request.headers.get('betId');
 	const choice_index_str = request.headers.get('choice');
 	const amount_str = request.headers.get('amount');
 
 	if (!bet_id || !choice_index_str || !amount_str || !checkData(bet_id, choice_index_str, amount_str)) {
-		return getResponse(false, `Ungültige Wettdaten. ${request.headers.get('bet_id')}`);
+		return getResponse(false, `Ungültige Wettdaten.`);
 	}
 
 	const choice_index = parseInt(choice_index_str);
@@ -43,9 +47,11 @@ export const POST = (async ({ request, locals }) => {
 		bet.choices[choice_index] = choice;
 	}
 
-	const success = (await updateUser(locals.userID, user)) && (await updateBet(bet.id, bet)) != null;
-
+	const new_bet = await updateBet(bet.id, bet);
+	const success = (await updateUser(locals.userID, user)) && new_bet != null;
 	if (!success) return getResponse(false, 'Der Server ist momentan überlastet.');
+
+	updateBetRate(new_bet);
 
 	return getResponse(true);
 }) satisfies RequestHandler;
@@ -62,4 +68,21 @@ function checkData(bet_id: string, choice_index: string, amount: string) {
 	else if (isNaN(parseInt(choice_index)) || isNaN(parseInt(amount))) return false;
 	else if (parseInt(amount) < 0) return false;
 	else return true;
+}
+
+function updateBetRate(bet: Bet | null) {
+	if (bet == null) return;
+	if (cooldown[bet.id]) {
+		update[bet.id] = bet;
+		return;
+	}
+
+	sendToBet(bet.id, `bet_rate==${JSON.stringify(bet.choices)}`);
+
+	update[bet.id] = null;
+	cooldown[bet.id] = true;
+	setTimeout(() => {
+		cooldown[bet.id] = false;
+		if (update[bet.id]) updateBetRate(update[bet.id]);
+	}, config.betRefreshRate);
 }

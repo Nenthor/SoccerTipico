@@ -2,7 +2,7 @@ import { getUser } from '$lib/server/database';
 import { getSessionManger } from '$lib/server/session';
 import { redirect, type Handle } from '@sveltejs/kit';
 import config from '$lib/server/data/config.json' assert { type: 'json' };
-import { sendAll, sendToBet, sendToDashboard, sendToLeaderboard, setupWebsocketServer } from '$lib/server/websocket';
+import { setupWebsocketServer } from '$lib/server/websocket';
 
 import('$lib/server/database'); // Connect with Pocketbase
 import('$lib/server/session'); // Connect with Redis
@@ -13,6 +13,7 @@ let firstConnection = false;
 
 const noAuthAllowedRoutes = ['/authentication', '/api/register', '/api/login'];
 const alwaysAllowedRouts = ['/datenschutz'];
+const adminRoutes = ['/admin', '/api/bet/create', '/api/bet/answer', '/api/user/ban', '/api/user/giveall', '/api/user/rename'];
 export const handle: Handle = (async ({ event, resolve }) => {
 	const userSession = await sessionManger.getSession(event.cookies);
 
@@ -33,20 +34,38 @@ export const handle: Handle = (async ({ event, resolve }) => {
 				throw redirect(307, '/authentication');
 			}
 
-			//Is authanticated
+			//Is authenticated
 			const user = await getUser(userSession.data.userID);
 
-			if (user) {
-				event.locals = {
-					userID: user.id,
-					username: user.username,
-					bets: user.bets,
-					total_points: user.total_points,
-					points: user.points,
-					default_points: config.defaultPoints,
-					isAdmin: user.isAdmin
-				};
+			if (!user) {
+				const { error } = await sessionManger.delSession(event.cookies);
+				if (error) await sessionManger.deleteCookie(event.cookies);
+				throw redirect(307, '/authentication');
 			}
+
+			if (adminRoutes.includes(event.url.pathname) && !user.isAdmin) {
+				if (event.request.method != 'GET') return new Response(JSON.stringify({ success: false, message: 'Nicht berechtigt.' }), { status: 401 });
+				throw redirect(307, '/dashboard');
+			} else if (event.url.pathname != '/banned' && user.isBanned) {
+				if (!(event.request.method == 'POST' && event.url.pathname == '/api/logout')) {
+					if (event.request.method != 'GET') return new Response(JSON.stringify({ success: false, message: 'Nicht berechtigt.' }), { status: 401 });
+					throw redirect(307, '/banned');
+				}
+			} else if (event.url.pathname == '/banned' && !user.isBanned) {
+				if (event.request.method != 'GET') return new Response(JSON.stringify({ success: false, message: 'Nicht berechtigt.' }), { status: 401 });
+				throw redirect(307, '/dashboard');
+			}
+
+			event.locals = {
+				userID: user.id,
+				username: user.username,
+				bets: user.bets,
+				total_points: user.total_points,
+				points: user.points,
+				default_points: config.defaultPoints,
+				isBanned: user.isBanned,
+				isAdmin: user.isAdmin
+			};
 		}
 	}
 

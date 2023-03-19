@@ -1,5 +1,6 @@
-import { createUser, getUserByName } from '$lib/server/database';
+import { createUser, getLowestLeader, getUserByName } from '$lib/server/database';
 import { getSessionManger } from '$lib/server/session';
+import { updateLeaderboard } from '$lib/server/websocket';
 import { randomBytes, scryptSync } from 'crypto';
 import type { RequestHandler } from './$types';
 
@@ -16,6 +17,8 @@ export const POST = (async ({ request, cookies }) => {
 	if (!user) return getResponse(false, 'Der Server ist momentan überlastet.');
 	const { error } = await getSessionManger().createNewSession(cookies, { userID: user.id });
 	if (error) return getResponse(false, 'Der Server ist momentan überlastet.');
+
+	if ((getLowestLeader()?.total_points || 0) < user.total_points) updateLeaderboard();
 
 	return getResponse(true);
 }) satisfies RequestHandler;
