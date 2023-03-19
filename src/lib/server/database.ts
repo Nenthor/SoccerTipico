@@ -64,7 +64,7 @@ export async function getBetByQuestion(question: string) {
 
 export async function getAllBets() {
 	try {
-		const records = await pb.collection('bets').getFullList(200, { $autoCancel: false });
+		const records = await pb.collection('bets').getFullList(100, { sort: 'timelimit', $autoCancel: false });
 		return extractBets(records);
 	} catch (error) {
 		return null;
@@ -76,6 +76,7 @@ export async function getAllOpenBets() {
 		const date = new Date().toISOString().replace('T', ' ');
 		const records = await pb.collection('bets').getFullList(100, {
 			filter: `timelimit >= "${date}"`,
+			sort: 'timelimit',
 			$autoCancel: false
 		});
 		return extractBets(records);
@@ -89,6 +90,7 @@ export async function getAllClosedBets() {
 		const date = new Date().toISOString().replace('T', ' ');
 		const records = await pb.collection('bets').getFullList(100, {
 			filter: `timelimit < "${date}"`,
+			sort: 'timelimit',
 			$autoCancel: false
 		});
 		return extractBets(records);
@@ -159,9 +161,10 @@ export async function getUserByName(username: string) {
 	}
 }
 
-export async function getAllUsers() {
+export async function getAllUsers(sorted: boolean = false) {
+	const params = sorted ? { sort: 'username', $autoCancel: false } : { $autoCancel: false };
 	try {
-		const records = await pb.collection('users').getFullList(200, { $autoCancel: false });
+		const records = await pb.collection('users').getFullList(200, params);
 		return extractUsers(records);
 	} catch (error) {
 		return null;

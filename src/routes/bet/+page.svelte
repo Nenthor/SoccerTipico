@@ -15,6 +15,7 @@
 	let points: number = 0;
 	let values: number[] = [];
 	let choices: string[] = [];
+	let timelimit: Date;
 	let error_message = '';
 	let bet_id = '';
 	let placed_amount = 0;
@@ -26,6 +27,7 @@
 	let choices_images: { [id: string]: HTMLImageElement } = {};
 	let bet_state = 'Geöffnet';
 	let refresh_bet_rate = false;
+	let bet_time: HTMLDivElement;
 	let socket: WebSocket | null;
 	onMount(() => {
 		const port = parseInt(location.port) - 10;
@@ -60,6 +62,22 @@
 					break;
 			}
 		});
+
+		//Bet timer
+		let time_diff = (timelimit.getTime() - new Date().getTime()) / 1000; //difference in s
+		let delay = 0;
+
+		if (time_diff <= 0) {
+			delay = 0;
+			time_diff = 0;
+		} else if (time_diff > 300) {
+			delay = time_diff - 300;
+			time_diff = 300;
+		}
+
+		bet_time.innerHTML = `<div><style>@keyframes bet_timer { from { transform: translateX(-${100 - (time_diff / 300) * 100}%); } to { transform: translateX(-100%); } }</style></div>`;
+		bet_time.style.width = '100%';
+		bet_time.style.animation = `bet_timer ${time_diff}s linear ${delay}s 1 normal forwards`;
 	});
 
 	if (data.success && data.bet && data.user) {
@@ -68,6 +86,7 @@
 		question = bet.question;
 		points = user.points;
 		bet_id = bet.id;
+		timelimit = new Date(bet.timelimit);
 
 		for (let index in bet.choices) {
 			Object.entries(bet.choices[index]).forEach(([key, value]) => {
@@ -96,7 +115,6 @@
 				bet_state = 'Geschlossen';
 			}, remaining_time);
 	}
-
 	function getColor(index: number) {
 		if (isYesNo && choices[index] == 'yes') return '#1e9c1e';
 		else if (isYesNo && choices[index] == 'no') return '#9c1e1e';
@@ -331,6 +349,7 @@
 			{#if bet_state == 'Geöffnet'}
 				<p id="error" bind:this={error_element}>{error_message}</p>
 				<button class="decision_submit" on:click={submitBet}>Wette abschließen</button>
+				<div class="bet_time" bind:this={bet_time} />
 			{/if}
 		</div>
 	</div>
@@ -458,11 +477,13 @@
 	}
 
 	.decision_amount_box {
+		position: relative;
 		display: flex;
 		align-items: center;
 		flex-direction: column;
 		background-color: #323232;
 		width: clamp(200px, 50%, 500px);
+		overflow: hidden;
 		padding: 10px 25px;
 		border-radius: 25px;
 	}
@@ -533,7 +554,7 @@
 	}
 
 	.decision_submit {
-		margin-top: 15px;
+		margin: 15px 0 5px 0;
 		padding: 7.5px 0;
 		width: clamp(100px, 100%, 350px);
 		border-radius: 15px;
@@ -554,6 +575,15 @@
 		min-height: 20px;
 		text-align: center;
 		color: #cd3232;
+	}
+
+	.bet_time {
+		position: absolute;
+		width: 0%;
+		height: 5px;
+		bottom: 0;
+		border-radius: 25px;
+		background-color: #cc1616;
 	}
 
 	.closed_amount {

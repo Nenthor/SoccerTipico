@@ -15,8 +15,10 @@ export const POST = (async ({ request }) => {
 
 	let finished = 0;
 	users.forEach((user) => {
-		user.total_points += points;
-		user.points += points;
+		if (user.total_points + points < 0) user.total_points = 0;
+		else user.total_points += points;
+		if (user.points + points < 0) user.points = 0;
+		else user.points += points;
 		updateUser(user.id, user).then(() => {
 			finished++;
 			if (finished == users.length) updateLeaderboard();

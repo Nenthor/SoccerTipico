@@ -137,25 +137,22 @@
 			<h2 class="container_title">Benutzer</h2>
 			<div class="scroler" id="user_container">
 				{#each users as user}
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<div class="scroler_Element" style={bg(user)} on:click={() => showUser(user)}>
+					<button class="scroler_Element" style={bg(user)} on:click={() => showUser(user)}>
 						<p>{user.username}</p>
-					</div>
+					</button>
 				{/each}
 			</div>
 		</div>
 		<div class="container">
 			<h2 class="container_title">Wetten</h2>
 			<div class="scroler" id="user_container">
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<div class="scroler_Element" on:click={() => newBet()}>
+				<button class="scroler_Element" on:click={() => newBet()}>
 					<div class="element_Part">Neue Wette</div>
-				</div>
+				</button>
 				{#each bets as bet}
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<div class="scroler_Element" on:click={() => showBet(bet)}>
+					<button class="scroler_Element" on:click={() => showBet(bet)}>
 						<p>{bet.question}</p>
-					</div>
+					</button>
 				{/each}
 			</div>
 		</div>
@@ -308,6 +305,8 @@
 		justify-content: center;
 		align-items: center;
 		border-radius: 5px;
+		border: none;
+		cursor: pointer;
 	}
 
 	.modal {
