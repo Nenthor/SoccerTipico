@@ -16,6 +16,7 @@ export const POST = (async ({ request }) => {
 	if (user.username == username) return getResponse(false, `Benutzername ist bereits gesetzt.`);
 
 	user.username = username;
+	user.username_filter = username.toLowerCase();
 	user = await updateUser(user.id, user);
 
 	if (!user) return getResponse(false, 'Der Server ist momentan überlastet.');

@@ -3,13 +3,18 @@ import { getSessionManger } from '$lib/server/session';
 import { timingSafeEqual, scryptSync } from 'crypto';
 import type { RequestHandler } from './$types';
 
-export const POST = (async ({ request, cookies }) => {
-	const username = request.headers.get('username');
-	const password = request.headers.get('password');
+const not_allowed_characters = /[1234567890`!@#$%^&*()_+=\[\]{};':"\\|,.<>\/?~]/;
 
-	if (!username || !password || !checkData(username, password)) {
+export const POST = (async ({ request, cookies }) => {
+	const username_raw = request.headers.get('username');
+	const password_raw = request.headers.get('password');
+
+	if (!username_raw || !password_raw || !checkData(username_raw, password_raw)) {
 		return getResponse(false, 'Ungültige Benutzerdaten.');
 	}
+
+	const username = username_raw.trim();
+	const password = password_raw.trim();
 
 	const user = await getUserByName(username);
 
@@ -29,6 +34,7 @@ function checkData(username: string, password: string) {
 	username = username.trim();
 	password = password.trim();
 	if (username == '' || password == '') return false;
+	else if (not_allowed_characters.test(username)) return false;
 	else return true;
 }
 

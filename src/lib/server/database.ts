@@ -9,6 +9,7 @@ console.log('Connected to PocketBase');
 export class User {
 	id: string;
 	username: string;
+	username_filter: string;
 	password: string;
 	total_points: number;
 	points: number;
@@ -16,9 +17,10 @@ export class User {
 	isBanned: boolean;
 	isAdmin: boolean;
 
-	constructor(id: string, username: string, password: string, total_points: number, points: number, bets: PlacedBet[], isBanned: boolean, isAdmin: boolean) {
+	constructor(id: string, username: string, username_filter: string, password: string, total_points: number, points: number, bets: PlacedBet[], isBanned: boolean, isAdmin: boolean) {
 		this.id = id;
 		this.username = username;
+		this.username_filter = username_filter;
 		this.password = password;
 		this.total_points = total_points;
 		this.points = points;
@@ -148,7 +150,7 @@ export async function getUser(id: string) {
 
 export async function getUserByName(username: string) {
 	try {
-		const record = await pb.collection('users').getFirstListItem(`username="${username}"`, {
+		const record = await pb.collection('users').getFirstListItem(`username_filter="${username.toLowerCase()}"`, {
 			$autoCancel: false
 		});
 		return extractUser(record);
@@ -206,6 +208,7 @@ export async function updateUser(id: string, user: User) {
 export async function createUser(username: string, password: string) {
 	const data = {
 		username: username,
+		username_filter: username.toLowerCase(),
 		password: password,
 		total_points: config.defaultPoints,
 		points: config.defaultPoints,
@@ -242,7 +245,7 @@ function extractUsers(records: Record[]) {
 }
 
 function extractUser(record: Record) {
-	return new User(record.id, record.username, record.password, record.total_points, record.points, record.bets, record.isBanned, record.isAdmin);
+	return new User(record.id, record.username, record.username_filter, record.password, record.total_points, record.points, record.bets, record.isBanned, record.isAdmin);
 }
 
 function extractBets(records: Record[]) {

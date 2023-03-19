@@ -12,6 +12,7 @@
 		bgp = 'rgb(255, 255, 255, 0.030)',
 		tca = 'rgb(255, 255, 255)',
 		tcp = 'rgb(255, 255, 255, 0.25)';
+	const not_allowed_characters = /[ 1234567890`!@#$%^&*()_+=\[\]{};':"\\|,.<>\/?~]/;
 
 	function showfstat(state: boolean) {
 		autoFocus.focus();
@@ -38,7 +39,6 @@
 	//authentication
 	let firstname: string;
 	let lastname: string;
-	lastname = 'nicht löschen';
 	let password: string;
 
 	let errorMessage = '';
@@ -51,7 +51,7 @@
 
 		const res = await fetch(`/api/${type}`, {
 			method: 'POST',
-			headers: { username: firstname, password: password }
+			headers: { username: `${firstname} ${lastname}`, password: password }
 		});
 		if (!res) {
 			setErrorMessage('Der Server ist momentan nicht erreichbar.');
@@ -68,11 +68,22 @@
 		if (!firstname || firstname.trim() == '' || !lastname || lastname.trim() == '' || !password || password.trim() == '') {
 			setErrorMessage('Fülle das Formular aus.');
 			return true;
-		} else if (reg && firstname.length < 3) {
+		}
+
+		firstname = firstname.trim();
+		lastname = lastname.trim();
+
+		if (reg && firstname.length < 3) {
 			setErrorMessage('Der Vorname muss mindestens 3 Buchstaben lang sein.');
 			return true;
 		} else if (reg && lastname.length < 3) {
 			setErrorMessage('Der Nachname muss mindestens 3 Buchstaben lang sein.');
+			return true;
+		} else if (reg && not_allowed_characters.test(firstname)) {
+			setErrorMessage('Kein gültiger Vorname.');
+			return true;
+		} else if (reg && not_allowed_characters.test(lastname)) {
+			setErrorMessage('Kein gültiger Nachname.');
 			return true;
 		}
 		return false;
@@ -99,12 +110,18 @@
 			<button class="title" bind:this={l} on:click={() => showfstat(false)}><h2>Anmelden</h2></button>
 		</div>
 		<form id="form_box">
-			<p class="form_description">Gebe dein Benutzername und Passwort ein um weiter Wetten abschließen zu können.</p>
+			{#if reg}
+				<p class="form_description">
+					Gebe deinen <span style="font-weight: bold; text-decoration-line: underline;">echten</span> Vor- und Nachnamen an, um Wetten abschließen zu können. Andernfalls könnte dein Account gesperrt werden.
+				</p>
+			{:else}
+				<p class="form_description">Gebe deine Benutzerdaten ein, um weitere Wetten abschließen zu können.</p>
+			{/if}
 			<p class="form_input_text">Vornamen:</p>
-			<input type="text" id="firstname" class="form_input" autocomplete="off" maxlength="20" placeholder="Vorname" bind:this={autoFocus} bind:value={firstname} />
+			<input type="text" id="firstname" class="form_input" autocomplete="off" maxlength="15" placeholder="Vorname" bind:this={autoFocus} bind:value={firstname} />
 			<br />
 			<p class="form_input_text">Nachname:</p>
-			<input type="text" id="lastname" class="form_input" autocomplete="off" maxlength="20" placeholder="Nachname" bind:value={lastname} />
+			<input type="text" id="lastname" class="form_input" autocomplete="off" maxlength="15" placeholder="Nachname" bind:value={lastname} />
 			<br />
 			<p class="form_input_text">Passwort:</p>
 			<input type="password" id="password" class="form_input" maxlength="25" placeholder="Passwort" bind:value={password} />
@@ -116,6 +133,11 @@
 					Anmelden
 				{/if}
 			</button>
+			{#if reg}
+				<p class="datenschutz">
+					Mit der Erstellung eines Kontos stimmst du unserer <a href="/datenschutz" on:click|preventDefault={() => location.replace('/datenschutz')}>Datenschutzerklärung</a> zu.
+				</p>
+			{/if}
 		</form>
 	</div>
 </div>
@@ -190,6 +212,7 @@
 		border: none;
 		outline: none;
 		padding: 0 5px;
+		border-radius: 5px;
 	}
 
 	#form_error {
@@ -210,10 +233,23 @@
 		font-weight: bold;
 		border: none;
 		cursor: pointer;
+		border-radius: 25px;
 	}
 
 	#form_submit:hover {
 		background-color: #ffffff3d;
 		color: white;
+	}
+
+	.datenschutz {
+		color: rgb(219, 219, 219);
+		text-align: center;
+		font-size: 0.9rem;
+		margin: 10px 0;
+	}
+
+	.datenschutz a {
+		text-decoration: none;
+		color: #1fceec;
 	}
 </style>
