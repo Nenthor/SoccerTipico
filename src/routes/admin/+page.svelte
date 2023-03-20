@@ -140,8 +140,9 @@
 			if(parseInt(modal_timelimit)>10)modal_timelimit ="10";
 			if(parseInt(modal_timelimit)<1)modal_timelimit ="1";
 			umtdate.setMinutes(umtdate.getMinutes() + parseInt(modal_timelimit));
-			umtdate.setHours(umtdate.getHours() + 2);
+			window.alert(umtdate)
 			const date = umtdate.toISOString();
+			window.alert(date);
 
 			const res = await fetch('/api/bet/create', {method: 'POST', headers: {question: modal_newquestion, choices: newchoices, timelimit: date}});
 			if (!res) {
@@ -191,7 +192,7 @@
 		<div class="container">
 			<h2 class="container_title">Wetten</h2>
 			<div class="scroler" id="user_container">
-				<button class="scroler_Element" on:click={() => newBet()}>
+				<button class="scroler_Element" style="background-color: #00ffeab6;" on:click={() => newBet()}>
 					<div class="element_Part">Neue Wette</div>
 				</button>
 				{#each bets as bet}
@@ -328,7 +329,7 @@
 
 	.container {
 		width: 45%;
-		height: 600px;
+		height: 60vh;
 		background-color: black;
 		border-radius: 10px;
 	}
@@ -374,11 +375,12 @@
 		width: 100%; /* Full width */
 		height: 100%; /* Full height */
 		overflow: auto; /* Enable scroll if needed */
+		background-color: #16161642;
 	}
 
 	.modal-content {
 		width: 50%;
-		height: 70%;
+		min-height: fit-content;
 		background-color: #242424b6;
 		backdrop-filter: blur(5px);
 		margin: auto;
@@ -389,7 +391,7 @@
 		align-items: center;
 		border-radius: 5px;
 		color: #fff;
-		font-size: 1.5rem;
+		font-size: clamp(0.5rem, 2vw, 1.5rem);
 	}
 
 	.modal_page {
@@ -399,7 +401,7 @@
 
 	.data_box {
 		width: 100%;
-		height: 80px;
+		height: 7vh;
 		margin-top: 20px;
 		display: flex;
 		align-items: center;

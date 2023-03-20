@@ -113,7 +113,7 @@ export async function createBet(question: string, choices: string[], timelimit: 
 	for (const choice of choices) {
 		choices_obj.push({ [choice]: 0 });
 	}
-	timelimit.setHours(timelimit.getHours() - 1);
+	/*timelimit.setHours(timelimit.getHours() + 1);*/
 
 	const data = {
 		question,
