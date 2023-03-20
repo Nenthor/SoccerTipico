@@ -36,6 +36,7 @@
 		timeout = setTimeout(() => (error_message = ''), 5000);
 	}
 
+
 	let modal: HTMLDivElement, userpage: HTMLDivElement, betpage: HTMLDivElement, newbetpage: HTMLDivElement;
 	let modal_title: HTMLHeadElement,
 		modal_username: HTMLParagraphElement,
@@ -69,20 +70,26 @@
 			res = await fetch('/api/user/ban', { method: 'POST', headers: { userID: modaluser.id } });
 		}
 		if (!res) {
-			setErrorMessage('Der Server ist momentan nicht erreichbar.');
-		} else {
-			const result = await res.json();
-			setErrorMessage(result.message);
+		setErrorMessage('Der Server ist momentan nicht erreichbar.');
+		return;
 		}
-		location.reload();
+
+		const result = await res.json();
+		if (result.success) {
+			location.reload();
+		} else if (result.message) setErrorMessage(result.message);
 	}
+
+
 
 	let modal_question: HTMLParagraphElement, modal_betstate: HTMLParagraphElement;
 
 	let bet_values: number[] = [];
 	let bet_choices: string[] = [];
+	let modal_bet: Bet;
 
 	function showBet(bet: Bet) {
+		modal_bet = bet;
 		modal.style.display = betpage.style.display = 'block';
 		modal_title.textContent = bet.id;
 		modal_question.textContent = bet.question;
@@ -108,7 +115,21 @@
 		modal_betstate.textContent = state;
 	}
 
-	function wetteAufloesen() {}
+	let right_answer: string;
+	async function wetteAufloesen() {
+		const res = await fetch('/api/bet/answer', {method: 'POST', headers:{betID: modal_bet.id, correctChoice: right_answer}})
+		if (!res) {
+		setErrorMessage('Der Server ist momentan nicht erreichbar.');
+		return;
+		}
+
+		const result = await res.json();
+		if (result.success) {
+			location.reload();
+		} else if (result.message) setErrorMessage(result.message);
+	}
+
+
 
 
 	let modal_newquestion: string,
@@ -116,8 +137,7 @@
 		modal_answer2: string,
 		modal_answer3: string,
 		modal_answer4: string,
-		modal_timelimit: string,
-		modal_savebetbutton: HTMLButtonElement;
+		modal_timelimit: string;
 
 	function newBet() {
 		modal.style.display = newbetpage.style.display = 'block';
@@ -140,9 +160,7 @@
 			if(parseInt(modal_timelimit)>10)modal_timelimit ="10";
 			if(parseInt(modal_timelimit)<1)modal_timelimit ="1";
 			umtdate.setMinutes(umtdate.getMinutes() + parseInt(modal_timelimit));
-			window.alert(umtdate)
 			const date = umtdate.toISOString();
-			window.alert(date);
 
 			const res = await fetch('/api/bet/create', {method: 'POST', headers: {question: modal_newquestion, choices: newchoices, timelimit: date}});
 			if (!res) {
@@ -152,8 +170,8 @@
 
 			const result = await res.json();
 			if (result.success) {
+				location.reload();
 			} else if (result.message) setErrorMessage(result.message);
-			location.reload();
 		}else{
 			setErrorMessage('da klapt aber etwas nicht guck mal wo der fehler sein könnte');
 		}
@@ -162,11 +180,6 @@
 	function hideModal() {
 		modal.style.display = userpage.style.display = betpage.style.display = newbetpage.style.display = 'none';
 	}
-
-	onMount(() => {
-		modal_userstatebutton.addEventListener('click', banUser);
-		modal_savebetbutton.addEventListener('click', savenewBet);
-	});
 </script>
 
 <Navbar>
@@ -229,7 +242,7 @@
 				<p bind:this={modal_userisBanned}>state</p>
 			</div>
 			<div class="buttons">
-				<button class="button" bind:this={modal_userstatebutton} />
+				<button class="button" bind:this={modal_userstatebutton} on:click={banUser}/>
 				<input type="button" class="button" value="Schließen" on:click={hideModal} />
 			</div>
 		</div>
@@ -251,8 +264,21 @@
 				<div class="line" />
 				<p bind:this={modal_betstate}>state</p>
 			</div>
+			<div class="data_box">
+				<p><input type="radio" class="input" bind:group={right_answer} name="right_answer" value={"0"}> {bet_choices[0]}</p>
+				<div class="line"></div>
+				<p><input type="radio" class="input" bind:group={right_answer} name="right_answer" value={"1"}> {bet_choices[1]}</p>
+				{#if bet_choices[2]}
+					<div class="line"></div>
+					<p><input type="radio" class="input" bind:group={right_answer} name="right_answer" value={"2"}> {bet_choices[2]}</p>
+				{/if}
+				{#if bet_choices[3]}
+					<div class="line"></div>
+					<p><input type="radio" class="input" bind:group={right_answer} name="right_answer" value={"3"}> {bet_choices[3]}</p>
+				{/if}
+			</div>
 			<div class="buttons">
-				<button class="button">Wette beenden / Gewinne ausschütten</button>
+				<button class="button" on:click={wetteAufloesen}>Wette beenden / Gewinne ausschütten</button>
 				<input type="button" class="button" value="Schließen" on:click={hideModal} />
 			</div>
 		</div>
@@ -288,7 +314,7 @@
 				<input class="input" type="number" name="" min="1" max="10" bind:value={modal_timelimit}>
 			</div>
 			<div class="buttons">
-				<button class="button" bind:this={modal_savebetbutton}>Veröffentlichen</button>
+				<button class="button" on:click={savenewBet}>Veröffentlichen</button>
 				<input type="button" class="button" value="Schließen" on:click={hideModal} />
 			</div>
 		</div>
