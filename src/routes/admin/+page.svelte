@@ -110,8 +110,52 @@
 
 	function wetteAufloesen() {}
 
+
+	let modal_newquestion: string,
+		modal_answer1: string,
+		modal_answer2: string,
+		modal_answer3: string,
+		modal_answer4: string,
+		modal_timelimit: string,
+		modal_savebetbutton: HTMLButtonElement;
+
 	function newBet() {
 		modal.style.display = newbetpage.style.display = 'block';
+		modal_title.textContent = 'Neu Wette';
+		modal_timelimit  = "5";
+	}
+
+	async function savenewBet() {
+		if(modal_newquestion && modal_answer1 && modal_answer2 && modal_timelimit){
+			let newchoice1: string = '"'+modal_answer1+'"',
+				newchoice2: string = ' ,"'+modal_answer2+'"',
+				newchoice3: string = '',
+				newchoice4: string = '';
+			
+			if(modal_answer3) newchoice3 = ' ,"'+modal_answer3+'"';
+			if(modal_answer4) newchoice4 = ' ,"'+modal_answer4+'"';
+			let newchoices = '['+newchoice1+newchoice2+newchoice3+newchoice4+']';
+
+			const umtdate = new Date();
+			if(parseInt(modal_timelimit)>10)modal_timelimit ="10";
+			if(parseInt(modal_timelimit)<1)modal_timelimit ="1";
+			umtdate.setMinutes(umtdate.getMinutes() + parseInt(modal_timelimit));
+			umtdate.setHours(umtdate.getHours() + 2);
+			const date = umtdate.toISOString();
+
+			const res = await fetch('/api/bet/create', {method: 'POST', headers: {question: modal_newquestion, choices: newchoices, timelimit: date}});
+			if (!res) {
+			setErrorMessage('Der Server ist momentan nicht erreichbar.');
+			return;
+			}
+
+			const result = await res.json();
+			if (result.success) {
+			} else if (result.message) setErrorMessage(result.message);
+			location.reload();
+		}else{
+			setErrorMessage('da klapt aber etwas nicht guck mal wo der fehler sein könnte');
+		}
 	}
 
 	function hideModal() {
@@ -120,6 +164,7 @@
 
 	onMount(() => {
 		modal_userstatebutton.addEventListener('click', banUser);
+		modal_savebetbutton.addEventListener('click', savenewBet);
 	});
 </script>
 
@@ -212,27 +257,37 @@
 		</div>
 		<div class="modal_page" bind:this={newbetpage}>
 			<div class="data_box">
-				<h2>Name:</h2>
+				<h2>Frage:</h2>
 				<div class="line" />
-				<p>name</p>
+				<input class="input" type="text" name="" placeholder="Frage" bind:value={modal_newquestion}>
 			</div>
 			<div class="data_box">
-				<h2>Gesamtpunktzahl:</h2>
+				<h2>1.Antwort:</h2>
 				<div class="line" />
-				<p>totalPoints</p>
+				<input class="input" type="text" name="" placeholder="Antwortmöglichkeit1" bind:value={modal_answer1}>
 			</div>
 			<div class="data_box">
-				<h2>Punktzahl:</h2>
+				<h2>2.Antwort:</h2>
 				<div class="line" />
-				<p>points</p>
+				<input class="input" type="text" name="" placeholder="Antwortmöglichkeit2" bind:value={modal_answer2}>
 			</div>
 			<div class="data_box">
-				<h2>Status:</h2>
+				<h2>3.Antwort:</h2>
 				<div class="line" />
-				<p>state</p>
+				<input class="input" type="text" name=""placeholder="Antwortmöglichkeit3(lehrlassen wenn nicht genutzt)" bind:value={modal_answer3}>
+			</div>
+			<div class="data_box">
+				<h2>4.Antwort:</h2>
+				<div class="line" />
+				<input class="input" type="text" name=""placeholder="Antwortmöglichkeit4(lehrlassen wenn nicht genutzt)" bind:value={modal_answer4}>
+			</div>
+			<div class="data_box">
+				<h2>timelimit:</h2>
+				<div class="line" />
+				<input class="input" type="number" name="" min="1" max="10" bind:value={modal_timelimit}>
 			</div>
 			<div class="buttons">
-				<button class="button" />
+				<button class="button" bind:this={modal_savebetbutton}>Veröffentlichen</button>
 				<input type="button" class="button" value="Schließen" on:click={hideModal} />
 			</div>
 		</div>
@@ -369,6 +424,12 @@
 		width: 49%;
 		height: 40px;
 		border: none;
+	}
+
+	.input{
+		width: 50%;
+		height: 50%;
+		font-size: 1rem;
 	}
 
 	@media screen and (max-width: 600px) {

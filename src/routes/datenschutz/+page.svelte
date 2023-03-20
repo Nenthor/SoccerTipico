@@ -385,6 +385,9 @@
 	}
 	p {
 		text-align: justify;
+		-webkit-user-select: text;
+		-ms-user-select: text;
+		user-select: text;
 	}
 	a {
 		color: #1fceec;
