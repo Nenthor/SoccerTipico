@@ -1,10 +1,12 @@
 export interface User {
-	userID: string;
+	id: string;
 	username: string;
 	bets: PlacedBet[];
-	points: number;
 	default_points: number;
+	total_points: number;
+	points: number;
 	isAdmin: boolean;
+	isBanned: boolean;
 }
 
 export interface Leader {

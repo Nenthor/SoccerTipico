@@ -167,7 +167,7 @@
 
 	#form_box {
 		position: relative;
-		width: clamp(350px, 70vw, 500px);
+		width: clamp(200px, 80vw, 500px);
 		min-height: 500px;
 		height: fit-content;
 	}
@@ -185,6 +185,7 @@
 		cursor: pointer;
 		color: #ffffff;
 		border: none;
+		font-size: clamp(0.5rem, 4vw, 0.9rem);
 	}
 
 	.form_description {

@@ -2,7 +2,7 @@ import { getLowestLeader, getUser, isLeader, updateUser } from '$lib/server/data
 import { updateLeaderboard } from '$lib/server/websocket';
 import type { RequestHandler } from './$types';
 
-export const POST = (async ({ request }) => {
+export const POST = (async ({ request, locals }) => {
 	const user_id = request.headers.get('userID');
 	const unban = request.headers.get('unban') == 'true'; //optional
 

@@ -1,8 +1,8 @@
-import { getUser, isLeader, updateUser } from '$lib/server/database';
+import { getUser, getUserByName, isLeader, updateUser } from '$lib/server/database';
 import { updateLeaderboard } from '$lib/server/websocket';
 import type { RequestHandler } from './$types';
 
-export const POST = (async ({ request }) => {
+export const POST = (async ({ request, locals }) => {
 	const user_id = request.headers.get('userID');
 	const username = request.headers.get('username'); // username= Vorname + ' ' + Nachname
 
@@ -12,8 +12,10 @@ export const POST = (async ({ request }) => {
 
 	let user = await getUser(user_id);
 	if (!user) return getResponse(false, 'Benutzer existiert nicht.');
-	if (user.isAdmin) return getResponse(false, `Admins können nicht umbenannt werden.`);
-	if (user.username == username) return getResponse(false, `Benutzername ist bereits gesetzt.`);
+	if (user.isAdmin && user.id != locals.id) return getResponse(false, `Admins können nicht umbenannt werden.`);
+	if (user.username == username) return getResponse(false, `Alter Benutzername kann nicht Neuer sein.`);
+	let check = await getUserByName(username);
+	if (check) return getResponse(false, `Benutzername ist bereits vergeben.`);
 
 	user.username = username;
 	user.username_filter = username.toLowerCase();

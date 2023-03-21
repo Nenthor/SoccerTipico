@@ -6,7 +6,7 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			userID: string;
+			id: string;
 			username: string;
 			bets: PlacedBet[];
 			total_points: number;

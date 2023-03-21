@@ -113,7 +113,6 @@ export async function createBet(question: string, choices: string[], timelimit: 
 	for (const choice of choices) {
 		choices_obj.push({ [choice]: 0 });
 	}
-	/*timelimit.setHours(timelimit.getHours() + 1);*/
 
 	const data = {
 		question,
@@ -145,7 +144,6 @@ export async function getUser(id: string) {
 		const record = await pb.collection('users').getOne(id, { $autoCancel: false });
 		return extractUser(record);
 	} catch (error) {
-		console.log(error);
 		return null;
 	}
 }

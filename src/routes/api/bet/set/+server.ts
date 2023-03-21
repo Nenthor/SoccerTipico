@@ -25,7 +25,7 @@ export const POST = (async ({ request, locals }) => {
 	if (new Date(bet.timelimit) < new Date()) return getResponse(false, 'Wette ist bereits geschlossen.');
 
 	//bet is valid - placing it
-	const user = await getUser(locals.userID);
+	const user = await getUser(locals.id);
 	if (!user) return getResponse(false, 'Der Server ist momentan überlastet.');
 
 	let previous_amount = 0;
@@ -48,7 +48,7 @@ export const POST = (async ({ request, locals }) => {
 	}
 
 	const new_bet = await updateBet(bet.id, bet);
-	const success = (await updateUser(locals.userID, user)) && new_bet != null;
+	const success = (await updateUser(locals.id, user)) && new_bet != null;
 	if (!success) return getResponse(false, 'Der Server ist momentan überlastet.');
 
 	updateBetRate(new_bet);
