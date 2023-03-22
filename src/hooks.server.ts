@@ -13,7 +13,7 @@ let firstConnection = false;
 
 const noAuthAllowedRoutes = ['/authentication', '/api/register', '/api/login'];
 const alwaysAllowedRouts = ['/datenschutz'];
-const adminRoutes = ['/admin', '/admin/user', '/admin/newbet', '/api/bet/create', '/api/bet/answer', '/api/user/ban', '/api/user/giveall', '/api/user/rename'];
+const adminRoutes = ['/admin', '/admin/user', '/admin/newbet', '/admin/bet', '/api/bet/create', '/api/bet/answer', '/api/user/ban', '/api/user/giveall', '/api/user/rename'];
 export const handle: Handle = (async ({ event, resolve }) => {
 	const userSession = await sessionManger.getSession(event.cookies);
 

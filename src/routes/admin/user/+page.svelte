@@ -174,7 +174,7 @@
 	<h2 class="actions_title">Globale Aktionen</h2>
 	<ul class="actions_box">
 		<li class="item" style="flex-direction: column;">
-			<p>Kontostand für <span style="color: #3bc5e7; font-weight: bold;">ALLE</span> erhöhen:</p>
+			<p style="text-align: center;">Kontostand für <span style="color: #3bc5e7; font-weight: bold;">ALLE</span> erhöhen:</p>
 			<input type="number" class="input" style="text-align: center;" placeholder="Betrag" bind:value={bonus_points} />
 			<button class="submit" on:click={onGiveAll}>Senden</button>
 		</li>
@@ -304,7 +304,7 @@
 		border: none;
 		margin-top: 5px;
 		padding: 5px 0;
-		min-width: 30%;
+		min-width: max(125px, 30%);
 		border-radius: 25px;
 		cursor: pointer;
 		font-weight: bold;

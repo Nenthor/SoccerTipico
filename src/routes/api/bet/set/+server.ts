@@ -27,6 +27,7 @@ export const POST = (async ({ request, locals }) => {
 	//bet is valid - placing it
 	const user = await getUser(locals.id);
 	if (!user) return getResponse(false, 'Der Server ist momentan überlastet.');
+	if (user.isBanned) return getResponse(false, 'Dieser Account wurde gesperrt.');
 
 	let previous_amount = 0;
 	const check_bet = user.bets.filter((b) => b.id == bet.id) || null;
