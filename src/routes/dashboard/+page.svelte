@@ -4,7 +4,7 @@
 	import type { PageData } from './$types';
 	import type { User, Bet, BetResult, HistoryItem } from '$lib/Types';
 	import { onMount } from 'svelte';
-	import { Chart, LineController, LineElement, PointElement, CategoryScale, LinearScale, Filler, type ScatterDataPoint } from 'chart.js';
+	import { Chart, CategoryScale, LineController, LinearScale, PointElement, LineElement, Filler } from 'chart.js';
 
 	export let data: PageData;
 
@@ -172,7 +172,8 @@
 	}
 
 	let canvas: HTMLCanvasElement;
-	Chart.register(LineController, LineElement, PointElement, CategoryScale, LinearScale, Filler);
+
+	Chart.register(CategoryScale, LineController, LinearScale, PointElement, LineElement, Filler);
 	Chart.defaults.font.family = 'montserrat';
 	Chart.defaults.font.weight = 'bold';
 
@@ -212,7 +213,8 @@
 						display: false
 					}
 				}
-			}
+			},
+			plugins: [Filler]
 		});
 	}
 </script>
