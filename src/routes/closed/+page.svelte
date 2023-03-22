@@ -27,9 +27,9 @@
 <Navbar />
 
 <div class="content">
-	<h1 class="title">Der Account <span style="color:#3bc5e7">{user?.username || 'Anonym'}</span> wurde gesperrt</h1>
-	<p class="subtitle">Suche einen Administrator auf, um weiter wetten zu können.</p>
-	<img src="/images/surprised_pikachu.webp" alt="surprised_pikachu" class="image" />
+	<h1 class="title"><span style="color:#3bc5e7">{user?.username || 'Anonym'}</span></h1>
+	<p class="subtitle">Das Wettsystem wird am 30.03 zur SoccerNight freigeschaltet.</p>
+	<img src="/images/waiting.webp" alt="still_waiting" class="image" />
 </div>
 
 <Footer />
@@ -65,8 +65,9 @@
 
 	.image {
 		margin-top: 10%;
-		max-width: 95%;
-		aspect-ratio: 1 / 1;
+		width: 95%;
+		max-width: 400px;
+		aspect-ratio: 247 / 204;
 		border: 3px solid #aaa;
 		border-radius: 25px;
 	}

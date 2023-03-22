@@ -3,6 +3,7 @@ import { getSessionManger } from '$lib/server/session';
 import { error, redirect, type Cookies, type Handle } from '@sveltejs/kit';
 import config from '$lib/server/data/config.json' assert { type: 'json' };
 import { setupWebsocketServer } from '$lib/server/websocket';
+import { settings } from '$lib/server/settings';
 
 import('$lib/server/database'); // Connect with Pocketbase
 import('$lib/server/session'); // Connect with Redis
@@ -13,7 +14,7 @@ let firstConnection = false;
 
 const noAuthAllowedRoutes = ['/authentication', '/api/register', '/api/login'];
 const alwaysAllowedRouts = ['/datenschutz'];
-const adminRoutes = ['/admin', '/admin/user', '/admin/newbet', '/admin/bet', '/api/bet/create', '/api/bet/answer', '/api/user/ban', '/api/user/giveall', '/api/user/rename'];
+const adminRoutes = ['/admin', '/admin/user', '/admin/newbet', '/admin/bet', '/api/bet/create', '/api/bet/answer', '/api/user/ban', '/api/user/giveall', '/api/user/rename', '/api/user/status'];
 export const handle: Handle = (async ({ event, resolve }) => {
 	const userSession = await sessionManger.getSession(event.cookies);
 
@@ -41,9 +42,7 @@ export const handle: Handle = (async ({ event, resolve }) => {
 				const { error } = await sessionManger.delSession(event.cookies);
 				if (error) await sessionManger.deleteCookie(event.cookies);
 				throw redirect(307, '/authentication');
-			}
-
-			if (adminRoutes.includes(event.url.pathname) && !user.isAdmin) {
+			} else if (adminRoutes.includes(event.url.pathname) && !user.isAdmin) {
 				if (event.request.method != 'GET') return new Response(JSON.stringify({ success: false, message: 'Nicht berechtigt.' }), { status: 401 });
 				throw redirect(307, '/dashboard');
 			} else if (event.url.pathname != '/banned' && user.isBanned) {
@@ -54,7 +53,8 @@ export const handle: Handle = (async ({ event, resolve }) => {
 			} else if (event.url.pathname == '/banned' && !user.isBanned) {
 				if (event.request.method != 'GET') return new Response(JSON.stringify({ success: false, message: 'Nicht berechtigt.' }), { status: 401 });
 				throw redirect(307, '/dashboard');
-			}
+			} else if (!settings.public && !user.isAdmin && event.url.pathname != '/closed') throw redirect(307, '/closed');
+			else if (settings.public && event.url.pathname == '/closed') throw redirect(307, '/dashboard');
 
 			event.locals = {
 				id: user.id,

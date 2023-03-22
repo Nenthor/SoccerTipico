@@ -199,7 +199,7 @@
 						borderColor: 'transparent',
 						pointBorderColor: 'transparent',
 						pointBackgroundColor: 'transparent',
-						backgroundColor: '#36A2EB',
+						backgroundColor: '#398dd1',
 						fill: true,
 						tension: 0.3
 					}
@@ -224,9 +224,11 @@
 		<li><a href="/admin" on:click|preventDefault={() => location.replace('/admin')}>Admin</a></li>
 	{/if}
 	<li><a href="/leaderboard" on:click|preventDefault={() => location.replace('/leaderboard')}>Rangliste</a></li>
-	<li>
-		<a href="/authentication" on:click|preventDefault={onLogout}>Abmelden</a>
-	</li>
+	{#if user.isAdmin}
+		<li>
+			<a href="/authentication" on:click|preventDefault={onLogout}>Abmelden</a>
+		</li>
+	{/if}
 </Navbar>
 
 <div class="content_box">
@@ -288,7 +290,7 @@
 
 	.content_box {
 		margin-top: 75px;
-		padding: 20px 0;
+		padding: 10px 0;
 		width: 100%;
 		display: flex;
 		flex-grow: 1;

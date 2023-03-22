@@ -1,5 +1,6 @@
 import { getUser } from '$lib/server/database';
 import type { PageServerLoad } from './$types';
+import { settings } from '$lib/server/settings';
 
 export const load = (async ({ url, locals }) => {
 	const user_id = url.searchParams.get('id');
@@ -18,5 +19,5 @@ export const load = (async ({ url, locals }) => {
 		isAdmin: user.isAdmin
 	};
 
-	return { success: true, user: JSON.stringify(user_safe), self: JSON.stringify(locals) };
+	return { success: true, user: JSON.stringify(user_safe), self: JSON.stringify(locals), is_public: `${settings.public}` };
 }) satisfies PageServerLoad;

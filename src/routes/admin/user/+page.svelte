@@ -121,6 +121,20 @@
 			global_error_msg = '';
 		}, 5000);
 	}
+
+	let is_public: boolean = data.is_public == 'true';
+	async function setWebsiteState() {
+		const res = await fetch('/api/user/status', { method: 'POST', headers: { status: `${!is_public}` } });
+		if (!res) {
+			setGlobalErrorMessage('Der Server ist momentan nicht erreichbar.');
+			return;
+		}
+		const result = await res.json();
+		if (result.success) {
+			const status = is_public ? 'Öffentlich' : 'Privat';
+			setGlobalErrorMessage(`Webseite wurde erfolgreich auf ${status} gesetzt.`, true);
+		} else if (result.message) setGlobalErrorMessage(result.message);
+	}
 </script>
 
 <Navbar>
@@ -177,6 +191,13 @@
 			<p style="text-align: center;">Kontostand für <span style="color: #3bc5e7; font-weight: bold;">ALLE</span> erhöhen:</p>
 			<input type="number" class="input" style="text-align: center;" placeholder="Betrag" bind:value={bonus_points} />
 			<button class="submit" on:click={onGiveAll}>Senden</button>
+		</li>
+		<li class="item" style="flex-direction: column;">
+			<p style="text-align: center;">Webseite ist Öffentlich:</p>
+			<label class="switch">
+				<input type="checkbox" bind:checked={is_public} on:click={setWebsiteState} />
+				<span class="slider round" />
+			</label>
 		</li>
 		<li class="item" style="margin: 0;">
 			<p id="error" bind:this={global_error}>{global_error_msg}</p>
@@ -337,5 +358,66 @@
 	input[type='number'] {
 		-moz-appearance: textfield;
 		appearance: textfield;
+	}
+
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 60px;
+		height: 34px;
+		margin-top: 10px;
+	}
+
+	.switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #999;
+		-webkit-transition: 0.4s;
+		transition: 0.4s;
+	}
+
+	.slider:before {
+		position: absolute;
+		content: '';
+		height: 26px;
+		width: 26px;
+		left: 4px;
+		bottom: 4px;
+		background-color: white;
+		-webkit-transition: 0.4s;
+		transition: 0.4s;
+	}
+
+	input:checked + .slider {
+		background-color: #2196f3;
+	}
+
+	input:focus + .slider {
+		box-shadow: 0 0 1px #2196f3;
+	}
+
+	input:checked + .slider:before {
+		-webkit-transform: translateX(26px);
+		-ms-transform: translateX(26px);
+		transform: translateX(26px);
+	}
+
+	/* Rounded sliders */
+	.slider.round {
+		border-radius: 34px;
+	}
+
+	.slider.round:before {
+		border-radius: 50%;
 	}
 </style>
