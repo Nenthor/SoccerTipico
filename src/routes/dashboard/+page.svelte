@@ -42,8 +42,19 @@
 					break;
 				case 'bet_result':
 					const bet_result: BetResult = JSON.parse(msg[1]);
+
+					const open_index = open_bets.findIndex((b) => b.id == bet_result.id);
+					const closed_index = closed_bets.findIndex((b) => b.id == bet_result.id);
+					if (open_index != -1) {
+						open_bets.splice(open_index, 1);
+						open_bets = open_bets;
+					} else if (closed_index != -1) {
+						closed_bets.splice(closed_index, 1);
+						closed_bets = closed_bets;
+					}
+
 					const index = user.bets.findIndex((b) => b.id == bet_result.id);
-					if (index == -1) break;
+					if (index == -1) break; // Check if user placed a bet
 
 					const placed_bet = user.bets[index];
 
@@ -56,15 +67,6 @@
 						profit += winnings;
 					}
 
-					const open_index = open_bets.findIndex((b) => b.id == bet_result.id);
-					const closed_index = closed_bets.findIndex((b) => b.id == bet_result.id);
-					if (open_index != -1) {
-						open_bets.splice(open_index, 1);
-						open_bets = open_bets;
-					} else if (closed_index != -1) {
-						closed_bets.splice(closed_index, 1);
-						closed_bets = closed_bets;
-					}
 					user.bets.splice(index, 1);
 					break;
 				default:

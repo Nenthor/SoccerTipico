@@ -18,7 +18,7 @@ export const POST = (async ({ request, locals }) => {
 	const amount = parseInt(amount_str);
 
 	const bet = await getBet(bet_id);
-	if (!bet) return getResponse(false, 'Ungültige Wett-ID.');
+	if (!bet) return getResponse(false, 'Wette ist nicht mehr verfügbar.');
 	const choice: any = bet.choices[choice_index];
 	if (!choice) return getResponse(false, 'Ungültige Wettoption.');
 	if (locals.points < amount) return getResponse(false, 'Wetteinsatz übersteigt Kontostand.');

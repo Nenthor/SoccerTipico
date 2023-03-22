@@ -184,12 +184,14 @@
 		{#each choices as choice, index}
 			<li class="item">
 				{#if isYesNo}
-					<p>Anteil <span style="background-color: {getColor(index)}; padding: 2px 5px; border-radius: 5px;">{choice == 'yes' ? 'Ja' : 'Nein'}</span></p>
+					<p style="display: flex; justify-content: center; align-items: center; ">
+						Anteil <img src={getYesNoImage(choice == 'yes')} alt={choice} style="background-color: {getColor(index)}; padding: 2px 2px; border-radius: 5px; margin-left: 5px;" width="20" height="20" />
+					</p>
 				{:else}
 					<p>Anteil Option <span style="background-color: {getColor(index)}; padding: 2px 5px; border-radius: 5px;">{getChoiceCharIndex(index)}</span></p>
 				{/if}
 				<div class="line" />
-				<p>{Math.round(values[index] / total_value) || 0}%</p>
+				<p>{Math.round((values[index] / total_value) * 100) || 0}%</p>
 			</li>
 		{/each}
 		<li class="item">
@@ -212,7 +214,7 @@
 	<h2 class="actions_title">Aktionen</h2>
 	<ul class="actions_box">
 		<li class="item" style="flex-direction: column;">
-			<p style="margin-bottom: 10px;">Wähle die Richtige Option:</p>
+			<p style="margin-bottom: 10px;">Wähle die Gewinn-Option:</p>
 			<div class="decision_choices">
 				{#each choices as choice, index}
 					{#if isYesNo}
@@ -288,7 +290,6 @@
 
 	.bet_choices_box {
 		margin: 40px 0 25px 0;
-		min-height: 150px;
 	}
 
 	.bet_choices_title {

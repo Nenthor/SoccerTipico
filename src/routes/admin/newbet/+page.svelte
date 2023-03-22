@@ -104,7 +104,7 @@
 		{/if}
 		<p style="color:white; margin-top: 10px">Zeitfenster</p>
 		<div class="timelimit_box">
-			<input type="number" class="input" placeholder="t" style="text-align: center; width: 25px" bind:value={timelimit_min} />
+			<input type="number" class="input" placeholder="x" style="text-align: center; width: 25px" bind:value={timelimit_min} />
 			<p>Minuten</p>
 		</div>
 		<p id="error" bind:this={error}>{error_msg}</p>
