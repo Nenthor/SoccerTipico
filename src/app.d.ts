@@ -1,6 +1,6 @@
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
-import type { PlacedBet } from '$lib/Types';
+import type { HistoryItem, PlacedBet } from '$lib/Types';
 
 declare global {
 	namespace App {
@@ -9,6 +9,7 @@ declare global {
 			id: string;
 			username: string;
 			bets: PlacedBet[];
+			history: HistoryItem[];
 			total_points: number;
 			points: number;
 			default_points: number;

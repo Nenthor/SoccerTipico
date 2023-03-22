@@ -389,7 +389,7 @@
 		border: none;
 		margin-top: 5px;
 		padding: 5px 0;
-		min-width: 50%;
+		min-width: max(200px, 50%);
 		border-radius: 25px;
 		cursor: pointer;
 		font-weight: bold;

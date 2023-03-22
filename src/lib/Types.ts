@@ -2,6 +2,7 @@ export interface User {
 	id: string;
 	username: string;
 	bets: PlacedBet[];
+	history: HistoryItem[];
 	default_points: number;
 	total_points: number;
 	points: number;
@@ -32,4 +33,9 @@ export interface BetResult {
 	choice: number;
 	pot_value: number;
 	bet_value: number;
+}
+
+export interface HistoryItem {
+	id: string;
+	points: number;
 }

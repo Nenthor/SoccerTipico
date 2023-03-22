@@ -46,6 +46,7 @@ export const POST = (async ({ request }) => {
 			user.total_points += winnings;
 			user.points += winnings;
 		}
+		user.history.push({ id: bet.id, points: user.total_points });
 
 		user.bets.splice(index, 1);
 		updateUser(user.id, user).then(() => {

@@ -60,6 +60,7 @@ export const handle: Handle = (async ({ event, resolve }) => {
 				id: user.id,
 				username: user.username,
 				bets: user.bets,
+				history: user.history,
 				total_points: user.total_points,
 				points: user.points,
 				default_points: config.defaultPoints,

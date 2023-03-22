@@ -2,8 +2,9 @@
 	import Footer from '$lib/Footer.svelte';
 	import Navbar from '$lib/Navbar.svelte';
 	import type { PageData } from './$types';
-	import type { User, Bet, BetResult } from '$lib/Types';
+	import type { User, Bet, BetResult, HistoryItem } from '$lib/Types';
 	import { onMount } from 'svelte';
+	import { Chart, LineController, LineElement, PointElement, CategoryScale, LinearScale, Filler, type ScatterDataPoint } from 'chart.js';
 
 	export let data: PageData;
 
@@ -13,6 +14,7 @@
 	let profit = 0;
 	let open_bets: Bet[] = [];
 	let closed_bets: Bet[] = [];
+	let history: HistoryItem[] = [];
 	const number_format = new Intl.NumberFormat();
 
 	let socket: WebSocket | null;
@@ -54,7 +56,11 @@
 					}
 
 					const index = user.bets.findIndex((b) => b.id == bet_result.id);
-					if (index == -1) break; // Check if user placed a bet
+					if (index == -1) {
+						// User did not bet
+						updateChart({ id: bet_result.id, points: profit + user.default_points });
+						break;
+					}
 
 					const placed_bet = user.bets[index];
 
@@ -67,12 +73,15 @@
 						profit += winnings;
 					}
 
+					updateChart({ id: bet_result.id, points: profit + user.default_points });
 					user.bets.splice(index, 1);
 					break;
 				default:
 					break;
 			}
 		});
+
+		createChart();
 	});
 
 	if (data.success && data.user) {
@@ -82,6 +91,9 @@
 		}
 
 		profit = user.points - user.default_points + placed_value;
+
+		history = user.history;
+		if (history && history.length == 1) history.push(history[0]);
 
 		if (data.open_bets) {
 			open_bets = JSON.parse(data.open_bets);
@@ -158,6 +170,51 @@
 	function hasPlacedBet(bet: Bet) {
 		return user.bets.find((b) => b.id == bet.id) != undefined;
 	}
+
+	let canvas: HTMLCanvasElement;
+	Chart.register(LineController, LineElement, PointElement, CategoryScale, LinearScale, Filler);
+	Chart.defaults.font.family = 'montserrat';
+	Chart.defaults.font.weight = 'bold';
+
+	let chart: Chart;
+	function updateChart(item: HistoryItem) {
+		if (chart) {
+			chart.data.labels?.push(item.id);
+			chart.data.datasets.forEach((dataset) => {
+				dataset.data.push(item.points);
+			});
+			chart.update();
+		}
+	}
+
+	function createChart() {
+		chart = new Chart(canvas, {
+			type: 'line',
+			data: {
+				labels: history.map((row) => row.id),
+				datasets: [
+					{
+						data: history.map((row) => row.points),
+						borderColor: 'transparent',
+						pointBorderColor: 'transparent',
+						pointBackgroundColor: 'transparent',
+						backgroundColor: '#36A2EB',
+						fill: true,
+						tension: 0.3
+					}
+				]
+			},
+			options: {
+				aspectRatio: 3 / 2,
+				responsive: true,
+				scales: {
+					x: {
+						display: false
+					}
+				}
+			}
+		});
+	}
 </script>
 
 <Navbar>
@@ -208,12 +265,25 @@
 				{/if}
 			{/each}
 		</ul>
+		<span class="bet_span" />
+		<h2 class="bet_title">Wettverlauf:</h2>
+		<div class="bet_chart">
+			<canvas bind:this={canvas} />
+		</div>
 	</div>
 </div>
 
 <Footer />
 
 <style>
+	.bet_chart {
+		width: clamp(300px, 80%, 750px);
+		background-color: #323232;
+		border-radius: 25px;
+		aspect-ratio: 3 / 2;
+		padding: 10px;
+	}
+
 	.content_box {
 		margin-top: 75px;
 		padding: 20px 0;

@@ -170,6 +170,7 @@
 
 	.user_container {
 		width: 100%;
+		margin-bottom: 10px;
 	}
 
 	.scroler {

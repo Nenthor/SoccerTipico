@@ -19,6 +19,8 @@ export const POST = (async ({ request }) => {
 		else user.total_points += points;
 		if (user.points + points < 0) user.points = 0;
 		else user.points += points;
+		user.history.push({ id: 'Bonus', points: user.total_points });
+
 		updateUser(user.id, user).then(() => {
 			finished++;
 			if (finished == users.length) updateLeaderboard();

@@ -1,4 +1,4 @@
-import type { PlacedBet } from '$lib/Types';
+import type { HistoryItem, PlacedBet } from '$lib/Types';
 import PocketBase, { ClientResponseError, Record } from 'pocketbase';
 import config from './data/config.json' assert { type: 'json' };
 
@@ -14,10 +14,22 @@ export class User {
 	total_points: number;
 	points: number;
 	bets: PlacedBet[];
+	history: HistoryItem[];
 	isBanned: boolean;
 	isAdmin: boolean;
 
-	constructor(id: string, username: string, username_filter: string, password: string, total_points: number, points: number, bets: PlacedBet[], isBanned: boolean, isAdmin: boolean) {
+	constructor(
+		id: string,
+		username: string,
+		username_filter: string,
+		password: string,
+		total_points: number,
+		points: number,
+		bets: PlacedBet[],
+		history: HistoryItem[],
+		isBanned: boolean,
+		isAdmin: boolean
+	) {
 		this.id = id;
 		this.username = username;
 		this.username_filter = username_filter;
@@ -25,6 +37,7 @@ export class User {
 		this.total_points = total_points;
 		this.points = points;
 		this.bets = bets;
+		this.history = history;
 		this.isBanned = isBanned;
 		this.isAdmin = isAdmin;
 	}
@@ -214,6 +227,7 @@ export async function createUser(username: string, password: string) {
 		total_points: config.defaultPoints,
 		points: config.defaultPoints,
 		bets: '[]',
+		history: JSON.stringify([{ id: 0, points: config.defaultPoints }]),
 		isBanned: false,
 		isAdmin: false
 	};
@@ -246,7 +260,7 @@ function extractUsers(records: Record[]) {
 }
 
 function extractUser(record: Record) {
-	return new User(record.id, record.username, record.username_filter, record.password, record.total_points, record.points, record.bets, record.isBanned, record.isAdmin);
+	return new User(record.id, record.username, record.username_filter, record.password, record.total_points, record.points, record.bets, record.history, record.isBanned, record.isAdmin);
 }
 
 function extractBets(records: Record[]) {
