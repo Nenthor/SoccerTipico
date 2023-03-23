@@ -2,18 +2,15 @@ import { createUser, getLowestLeader, getUserByName } from '$lib/server/database
 import { getSessionManger } from '$lib/server/session';
 import { updateLeaderboard } from '$lib/server/websocket';
 import { randomBytes, scryptSync } from 'crypto';
-import Filter from 'bad-words';
 import type { RequestHandler } from './$types';
 
 const not_allowed_characters = /[1234567890`!@#$%^&*()_+=\[\]{};':"\\|,.<>\/?~]/;
-const bad_words = new Filter();
 
 export const POST = (async ({ request, cookies }) => {
 	const username_raw = request.headers.get('username');
 	const password_raw = request.headers.get('password');
 
 	if (!username_raw || !password_raw || !checkData(username_raw, password_raw)) return getResponse(false, 'Ungültige Benutzerdaten.');
-	if (bad_words.isProfane(username_raw)) return getResponse(false, 'Anstößige Benutzernamen sind nicht erlaubt.');
 	if (!(await checkUsername(username_raw))) return getResponse(false, 'Benutzername ist bereits vergeben.');
 
 	const username = username_raw.trim();

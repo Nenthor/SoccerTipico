@@ -14,7 +14,19 @@ let firstConnection = false;
 
 const noAuthAllowedRoutes = ['/authentication', '/api/register', '/api/login'];
 const alwaysAllowedRouts = ['/datenschutz'];
-const adminRoutes = ['/admin', '/admin/user', '/admin/newbet', '/admin/bet', '/api/bet/create', '/api/bet/answer', '/api/user/ban', '/api/user/giveall', '/api/user/rename', '/api/user/status'];
+const adminRoutes = [
+	'/admin',
+	'/admin/user',
+	'/admin/newbet',
+	'/admin/bet',
+	'/api/bet/create',
+	'/api/bet/answer',
+	'/api/user/ban',
+	'/api/user/delete',
+	'/api/user/giveall',
+	'/api/user/rename',
+	'/api/user/status'
+];
 export const handle: Handle = (async ({ event, resolve }) => {
 	const userSession = await sessionManger.getSession(event.cookies);
 
@@ -53,8 +65,8 @@ export const handle: Handle = (async ({ event, resolve }) => {
 			} else if (event.url.pathname == '/banned' && !user.isBanned) {
 				if (event.request.method != 'GET') return new Response(JSON.stringify({ success: false, message: 'Nicht berechtigt.' }), { status: 401 });
 				throw redirect(307, '/dashboard');
-			} else if (!settings.public && !user.isAdmin && event.url.pathname != '/closed') throw redirect(307, '/closed');
-			else if (settings.public && event.url.pathname == '/closed') throw redirect(307, '/dashboard');
+			} else if (!settings.public && !user.isBanned && !user.isAdmin && event.url.pathname != '/closed') throw redirect(307, '/closed');
+			else if (settings.public && !user.isBanned && event.url.pathname == '/closed') throw redirect(307, '/dashboard');
 
 			event.locals = {
 				id: user.id,

@@ -3,6 +3,8 @@
 	import Navbar from '$lib/Navbar.svelte';
 	import type { Bet, User } from '$lib/server/database';
 	import type { PageData } from './$types';
+	import { Chart, CategoryScale, BarController, LinearScale, BarElement, Filler } from 'chart.js';
+	import { onMount } from 'svelte';
 
 	export let data: PageData;
 
@@ -11,7 +13,6 @@
 	let users_search: User[];
 	let bets: Bet[];
 	let bets_search: Bet[];
-	let error_message = '';
 
 	if (data.success && data.users && data.bets) {
 		admin = JSON.parse(data.user);
@@ -19,6 +20,10 @@
 		bets = JSON.parse(data.bets);
 		users_search = users;
 		bets_search = bets;
+
+		onMount(() => {
+			if (users) createChart();
+		});
 	}
 
 	let search_user: string;
@@ -61,6 +66,56 @@
 	function newBet() {
 		window.location.href = '/admin/newbet';
 	}
+
+	let canvas: HTMLCanvasElement;
+
+	Chart.register(CategoryScale, BarController, LinearScale, BarElement, Filler);
+	Chart.defaults.font.family = 'montserrat';
+	Chart.defaults.font.weight = 'bold';
+
+	let chart: Chart;
+	function createChart() {
+		const points_distribution = [
+			{ label: '= 0', max_value: 0, amount: 0 },
+			{ label: '< 0,5k', max_value: 500, amount: 0 },
+			{ label: '< 1k', max_value: 1000, amount: 0 },
+			{ label: '= 1k', max_value: 1001, amount: 0 },
+			{ label: '< 1,5k', max_value: 1500, amount: 0 },
+			{ label: '< 2k', max_value: 2000, amount: 0 },
+			{ label: '< 2,5k', max_value: 2500, amount: 0 },
+			{ label: '< 3k', max_value: 3000, amount: 0 },
+			{ label: '> 3k', max_value: Number.MAX_VALUE, amount: 0 }
+		];
+
+		for (const user of users) {
+			if (user.isAdmin || user.isBanned) continue;
+			const i = points_distribution.findIndex((d) => user.total_points < d.max_value);
+			if (i != -1) points_distribution[i].amount++;
+		}
+
+		chart = new Chart(canvas, {
+			type: 'bar',
+			data: {
+				labels: points_distribution.map((row) => row.label),
+				datasets: [
+					{
+						data: points_distribution.map((row) => row.amount),
+						borderColor: 'transparent',
+						pointBorderColor: 'transparent',
+						pointBackgroundColor: 'transparent',
+						backgroundColor: '#398dd1',
+						fill: true,
+						tension: 0.3
+					}
+				]
+			},
+			options: {
+				aspectRatio: 3 / 2,
+				responsive: true
+			},
+			plugins: [Filler]
+		});
+	}
 </script>
 
 <Navbar>
@@ -74,7 +129,7 @@
 	<h1 id="admin_title">Adminpanel von <span style="color:#3bc5e7">{admin?.username || 'Anonym'}</span></h1>
 	<div class="containers">
 		<div class="container">
-			<h2 class="container_title">Benutzer</h2>
+			<h2 class="container_title">Benutzer - {users_search.length}</h2>
 			<input type="text" class="search" placeholder="Benutzer suchen..." bind:value={search_user} />
 			<div class="scroler user_container">
 				{#each users_search as user}
@@ -85,7 +140,7 @@
 			</div>
 		</div>
 		<div class="container">
-			<h2 class="container_title">Wetten</h2>
+			<h2 class="container_title">Wetten - {bets_search.length}</h2>
 			<input type="text" class="search" placeholder="Wette suchen..." bind:value={search_bet} />
 			<div class="scroler user_container">
 				<button class="scroler_Element" style="background-color: #00ffeab6;" on:click={() => newBet()}>
@@ -98,6 +153,11 @@
 				{/each}
 			</div>
 		</div>
+	</div>
+	<br />
+	<h2 class="container_title">Kapitalverteilung</h2>
+	<div class="bet_chart">
+		<canvas bind:this={canvas} />
 	</div>
 </div>
 
@@ -195,6 +255,14 @@
 		border-radius: 5px;
 		border: none;
 		cursor: pointer;
+	}
+
+	.bet_chart {
+		width: clamp(300px, 80%, 750px);
+		background-color: #323232;
+		border-radius: 25px;
+		aspect-ratio: 3 / 2;
+		padding: 10px;
 	}
 
 	@media screen and (max-width: 600px) {

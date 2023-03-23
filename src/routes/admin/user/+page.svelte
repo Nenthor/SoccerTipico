@@ -7,6 +7,7 @@
 	export let data: PageData;
 	let user: User;
 	let self: User;
+	let is_removed = false;
 	let is_banned = false;
 	let is_admin = false;
 	let error_msg = '';
@@ -22,6 +23,7 @@
 
 	function getState(user: User) {
 		if (is_admin) return 'Admin';
+		else if (is_removed) return 'Gelöscht';
 		else if (is_banned) return 'Gesperrt';
 		else return 'Normal';
 	}
@@ -69,6 +71,26 @@
 				is_banned = user.isBanned;
 				if (user.isBanned) setErrorMessage('Benutzername erfolgreich gesperrt.', true);
 				else setErrorMessage('Benutzername erfolgreich entsperrt.', true);
+			} else if (result.message) setErrorMessage(result.message);
+		}
+	}
+
+	async function onDelete() {
+		const valid = confirm('Soll dieser Account wirklich gelöscht werden?');
+		if (!valid) return;
+
+		if (!user) setErrorMessage('Benutzer-ID nicht gefunden.');
+		else {
+			const res = await fetch('/api/user/delete', { method: 'POST', headers: { userID: user.id } });
+			if (!res) {
+				setErrorMessage('Der Server ist momentan nicht erreichbar.');
+				return;
+			}
+			const result = await res.json();
+			if (result.success) {
+				is_removed = true;
+				user = user;
+				setErrorMessage('Benutzername erfolgreich gelöscht.', true);
 			} else if (result.message) setErrorMessage(result.message);
 		}
 	}
@@ -167,12 +189,15 @@
 			<p>{getState(user)}</p>
 		</li>
 	</ul>
-	{#if !is_admin || user.id == self.id}
+	{#if user && (!is_admin || user.id == self.id)}
 		<h2 class="actions_title">Aktionen</h2>
 		<ul class="actions_box">
 			{#if user.id != self.id}
 				<li class="item">
 					<button class="action_ban {is_banned ? 'ban_undo' : 'ban_do'}" on:click={onBan}>Benutzer {is_banned ? 'Entsperren' : 'Sperren'}</button>
+				</li>
+				<li class="item">
+					<button class="action_ban delete" on:click={onDelete}>Account Löschen</button>
 				</li>
 			{/if}
 			<li class="item" style="flex-direction: column;">
@@ -276,13 +301,21 @@
 
 	.action_ban {
 		border: none;
-		padding: 7.5px 20px;
+		padding: 10px 20px;
 		border-radius: 25px;
 		font-size: 1rem;
 		font-weight: bold;
 		min-width: 50%;
 		cursor: pointer;
 		color: white;
+	}
+
+	.delete {
+		background-color: #830505;
+	}
+
+	.delete:hover {
+		background-color: #750303;
 	}
 
 	.ban_do {
