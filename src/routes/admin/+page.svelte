@@ -154,7 +154,7 @@
 			</div>
 		</div>
 	</div>
-	<br />
+	<br/>
 	<h2 class="container_title">Kapitalverteilung</h2>
 	<div class="bet_chart">
 		<canvas bind:this={canvas} />
