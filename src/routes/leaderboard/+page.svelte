@@ -1,13 +1,16 @@
 <script lang="ts">
 	import Footer from '$lib/Footer.svelte';
 	import Navbar from '$lib/Navbar.svelte';
+	import type { User } from '$lib/server/database';
 	import type { Leader } from '$lib/Types';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
+	let self: User;
 	let leaders: Leader[];
+	let ranking = -1;
 	const number_format = new Intl.NumberFormat();
 
 	let socket: WebSocket | null;
@@ -29,6 +32,7 @@
 						new_leaders.push(...Array(10 - new_leaders.length).fill({ username: '-', total_points: 0 }));
 					}
 					if (new_leaders) leaders = new_leaders;
+					updateRanking();
 					break;
 				default:
 					break;
@@ -37,7 +41,9 @@
 	});
 
 	if (data.success && data.leaders) {
+		self = JSON.parse(data.user);
 		leaders = JSON.parse(data.leaders);
+		ranking = parseInt(data.ranking);
 		if (leaders && leaders.length < 10) {
 			leaders.push(...Array(10 - leaders.length).fill({ username: '-', total_points: 0 }));
 		}
@@ -59,6 +65,18 @@
 
 		return `background-color: ${podium_colors[index]}; text-shadow: 0 0 4px #161616;`;
 	}
+
+	async function updateRanking() {
+		const res = await fetch(`/api/user/ranking`, { method: 'POST' });
+		if (!res) {
+			console.error('Der Server ist momentan nicht erreichbar.');
+			return;
+		}
+		const result = await res.json();
+		if (result.success && result.message) {
+			ranking = parseInt(result.message);
+		} else if (result.message) console.error(result.message);
+	}
 </script>
 
 <Navbar>
@@ -78,6 +96,16 @@
 					<div class="container rand"><p class="leader_text">{getValueString(leader.total_points)}</p></div>
 				</li>
 			{/each}
+			{#if ranking > 10}
+				{#if ranking != 11}
+					<p class="dots">...</p>
+				{/if}
+				<li class="leader_item">
+					<div class="container rand"><p class="leader_text ranking">#{ranking + 1}</p></div>
+					<div class="container center"><h2 class="leader_text leader_name">{self.username}</h2></div>
+					<div class="container rand"><p class="leader_text">{getValueString(self.total_points)}</p></div>
+				</li>
+			{/if}
 		</ul>
 	</div>
 </div>
@@ -166,5 +194,11 @@
 		width: 95%;
 		overflow-wrap: break-word;
 		color: aqua;
+	}
+
+	.dots {
+		color: white;
+		text-align: center;
+		font-size: 2rem;
 	}
 </style>

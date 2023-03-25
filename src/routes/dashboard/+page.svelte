@@ -76,6 +76,21 @@
 					updateChart({ id: bet_result.id, points: profit + user.default_points });
 					user.bets.splice(index, 1);
 					break;
+				case 'bet_timelimit':
+					const new_timelimit = JSON.parse(msg[1]);
+					if (!new_timelimit || !new_timelimit.id || !new_timelimit.timelimit) break;
+					const element = open_bet_elements[new_timelimit.id];
+					if (element) {
+						const i = open_bets.findIndex((b) => b.id == new_timelimit.id);
+						if (i == -1) break;
+						if (timeouts[new_timelimit.id]) clearTimeout(timeouts[new_timelimit.id]);
+						element.style.width = '0%';
+						element.style.animation = 'none';
+						element.innerHTML = '';
+						open_bets[i].timelimit = new_timelimit.timelimit;
+						open_bets = open_bets;
+					}
+					break;
 				default:
 					break;
 			}
@@ -108,10 +123,12 @@
 
 	let closed_bet_elements: { [id: string]: HTMLElement } = {};
 	let open_bet_elements: { [id: string]: HTMLElement } = {};
+	let timeouts: any[] = [];
 	$: for (const index in open_bet_elements) {
 		const element = open_bet_elements[index];
-		const bet = open_bets.find((e) => e.id == index);
-		if (!element || !bet) continue;
+		const i = open_bets.findIndex((b) => b.id == index);
+		const bet = open_bets[i];
+		if (!element || !bet || element.innerHTML) continue;
 
 		let time_diff = (new Date(bet.timelimit).getTime() - new Date().getTime()) / 1000; //difference in s
 		let delay = 0;
@@ -132,11 +149,13 @@
 			window.location.href = `/bet?id=${bet.id}`;
 		});
 
-		setTimeout(() => {
-			element.parentNode?.parentNode?.removeChild(element.parentNode);
-			const i = open_bets.indexOf(bet);
-			if (i != -1) {
-				closed_bets.push(open_bets.splice(i, 1)[0]);
+		timeouts[i] = setTimeout(() => {
+			element.style.width = '0%';
+			element.style.animation = 'none';
+			element.innerHTML = '';
+			const j = open_bets.findIndex((b) => b.id == bet.id);
+			if (j != -1) {
+				closed_bets.push(open_bets.splice(j, 1)[0]);
 				closed_bets = closed_bets; // Force Update
 				open_bets = open_bets; // Force Update
 			}

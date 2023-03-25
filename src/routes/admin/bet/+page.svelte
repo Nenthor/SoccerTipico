@@ -3,11 +3,13 @@
 	import Navbar from '$lib/Navbar.svelte';
 	import type { PageData } from './$types';
 	import type { Bet, User } from '$lib/Types';
+	import { onMount } from 'svelte';
 
 	export let data: PageData;
 	let bet: Bet;
 	let self: User;
 	let error_msg = '';
+	let error_time_msg = '';
 	let total_value = 0;
 	let choices: string[] = [];
 	let values: number[] = [];
@@ -19,6 +21,7 @@
 	if (data.success && data.bet) {
 		bet = JSON.parse(data.bet);
 		self = JSON.parse(data.self);
+
 		remaining_time = new Date(bet.timelimit).getTime() - new Date().getTime();
 		if (remaining_time < 0) remaining_time = 0;
 
@@ -128,6 +131,18 @@
 		}, 5000);
 	}
 
+	let error_time: HTMLElement;
+	let timeout_time: any;
+	function setTimeErrorMessage(msg: string, success = false) {
+		if (timeout_time) clearTimeout(timeout_time);
+		error_time_msg = msg;
+		if (success) error_time.style.color = '#32cd32';
+		else error_time.style.color = '#cd3232';
+		timeout_time = setTimeout(() => {
+			error_time_msg = '';
+		}, 5000);
+	}
+
 	async function onDecision() {
 		if (!bet) setErrorMessage('Bet-ID konnte nicht gefunden werden.');
 		else if (selected_choice == -1) setErrorMessage('Wähle die Gewinn-Option aus.');
@@ -144,6 +159,26 @@
 				remaining_time = 0;
 				setErrorMessage('Wette erfolgreich ausgeschüttet.', true);
 			} else if (result.message) setErrorMessage(result.message);
+		}
+	}
+
+	let timelimit_sec: number;
+	async function updateTime() {
+		if (!bet) setTimeErrorMessage('Bet-ID konnte nicht gefunden werden.');
+		else if (timelimit_sec !== 0 && !timelimit_sec) setTimeErrorMessage('Gebe ein neues Zeitfenster an.');
+		else if (timelimit_sec < 0) setTimeErrorMessage('Neues Zeitfenster darf nicht negativ sein');
+		else if (timelimit_sec > 600) setTimeErrorMessage('Neues Zeitfenster darf nicht größer als 10min sein');
+		else {
+			const res = await fetch('/api/bet/newtime', { method: 'POST', headers: { betID: bet.id, time: timelimit_sec.toString() } });
+			if (!res) {
+				setTimeErrorMessage('Der Server ist momentan nicht erreichbar.');
+				return;
+			}
+			const result = await res.json();
+			if (result.success) {
+				setTimeErrorMessage('Das Zeitfenster wurde erfolgreich aktualisiert.', true);
+				remaining_time = timelimit_sec * 1000;
+			} else if (result.message) setTimeErrorMessage(result.message);
 		}
 	}
 </script>
@@ -213,8 +248,22 @@
 	</ul>
 	<h2 class="actions_title">Aktionen</h2>
 	<ul class="actions_box">
+		{#if bet}
+			<li class="item" style="flex-direction: column;">
+				<a class="view" href="/bet?id={bet.id}&view=true" on:click|preventDefault={() => location.replace(`/bet?id=${bet.id}&view=true`)}>Wette ansehen</a>
+			</li>
+		{/if}
 		<li class="item" style="flex-direction: column;">
-			<p style="margin-bottom: 10px;">Wähle die Gewinn-Option:</p>
+			<p style="margin-bottom: 5px;">Verbleibende Zeit setzen:</p>
+			<div class="timelimit_box">
+				<input type="number" class="input" placeholder="x" style="text-align: center; width: 40px" bind:value={timelimit_sec} title="0s bis 600s" />
+				<p>Sekunden</p>
+			</div>
+			<p id="error" bind:this={error_time}>{error_time_msg}</p>
+			<button class="submit" on:click={updateTime}>Zeitfenster ändern</button>
+		</li>
+		<li class="item" style="flex-direction: column;">
+			<p style="margin-bottom: 5px;">Wähle die Gewinn-Option:</p>
 			<div class="decision_choices">
 				{#each choices as choice, index}
 					{#if isYesNo}
@@ -388,18 +437,78 @@
 	.submit {
 		border: none;
 		margin-top: 5px;
-		padding: 5px 0;
+		padding: 8px 0;
 		min-width: max(200px, 50%);
 		border-radius: 25px;
 		cursor: pointer;
 		font-weight: bold;
 		color: white;
 		background-color: #1e9c1e;
-		font-size: 1rem;
+		font-size: 1.1rem;
 	}
 
 	.submit:hover {
 		background-color: #186d18;
+	}
+
+	.timelimit_box {
+		display: flex;
+		align-items: center;
+	}
+
+	.timelimit_box p {
+		color: white;
+		margin-left: 10px;
+	}
+
+	.input {
+		padding: 5px 10px;
+		border: 3px solid transparent;
+		margin: 5px 0;
+		border-radius: 25px;
+		font-size: 1rem;
+		outline: none;
+	}
+
+	.input:focus {
+		border: 3px solid #398dd1;
+	}
+
+	.input::placeholder {
+		text-align: center;
+	}
+
+	/* Chrome, Safari, Edge, Opera */
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	/* Firefox */
+	input[type='number'] {
+		-moz-appearance: textfield;
+		appearance: textfield;
+	}
+
+	.view {
+		border: none;
+		margin-top: 5px;
+		padding: 8px 0;
+		min-width: max(200px, 50%);
+		border-radius: 25px;
+		cursor: pointer;
+		font-weight: bold;
+		color: #1eb3d8;
+		background-color: white;
+		font-size: 1.1rem;
+		text-align: center;
+		text-decoration: none;
+	}
+
+	.view:hover {
+		background-color: #1eb3d8;
+		color: white;
 	}
 
 	#error {

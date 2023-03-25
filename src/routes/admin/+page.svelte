@@ -129,7 +129,7 @@
 	<h1 id="admin_title">Adminpanel von <span style="color:#3bc5e7">{admin?.username || 'Anonym'}</span></h1>
 	<div class="containers">
 		<div class="container">
-			<h2 class="container_title">Benutzer - {users_search.length}</h2>
+			<h2 class="container_title">Benutzer ({users_search.length})</h2>
 			<input type="text" class="search" placeholder="Benutzer suchen..." bind:value={search_user} />
 			<div class="scroler user_container">
 				{#each users_search as user}
@@ -140,7 +140,7 @@
 			</div>
 		</div>
 		<div class="container">
-			<h2 class="container_title">Wetten - {bets_search.length}</h2>
+			<h2 class="container_title">Wetten ({bets_search.length})</h2>
 			<input type="text" class="search" placeholder="Wette suchen..." bind:value={search_bet} />
 			<div class="scroler user_container">
 				<button class="scroler_Element" style="background-color: #00ffeab6;" on:click={() => newBet()}>

@@ -161,8 +161,9 @@
 
 	.form {
 		background-color: rgba(108, 108, 108, 0.053);
+		-webkit-backdrop-filter: blur(10px);
 		backdrop-filter: blur(10px);
-		box-shadow: 3px 3px rgba(0, 0, 0, 0.427), 0 0 10px 5px #8000ff17;
+		box-shadow: 0 0 10px 5px #8000ff17;
 	}
 
 	#form_box {

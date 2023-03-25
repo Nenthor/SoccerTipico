@@ -66,6 +66,7 @@ export function sendAll(message: string) {
  * Send messages to all Dashboard clients
  * @param message - `bet_new==[type Bet]`
  * @param message - `bet_result==[type BetResult]`
+ * @param message - `bet_timelimit=={id: bet_id, timelimit: new_timelimit}`
  */
 export function sendToDashboard(message: string) {
 	if (!wss) return;
@@ -89,6 +90,7 @@ export function sendToLeaderboard(message: string) {
  * Send messages to all bet clients with same bet_id
  * @param bet_id - Unique betId
  * @param message - `bet_rate==[type bet.choices[]]`
+ * @param message - `bet_timelimit==[number]`
  */
 export function sendToBet(bet_id: string, message: string) {
 	if (!wss || !bet_sockets[bet_id]) return;

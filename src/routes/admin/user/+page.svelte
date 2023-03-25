@@ -157,6 +157,21 @@
 			setGlobalErrorMessage(`Webseite wurde erfolgreich auf ${status} gesetzt.`, true);
 		} else if (result.message) setGlobalErrorMessage(result.message);
 	}
+
+	async function onGlobalReset() {
+		const valid = confirm('Sollen alle Benutzer-Daten und Wetten zurückgesetzt werden? Die Benutzer selbst werden nicht gelöscht.');
+		if (!valid) return;
+
+		const res = await fetch('/api/user/globalreset', { method: 'POST' });
+		if (!res) {
+			setGlobalErrorMessage('Der Server ist momentan nicht erreichbar.');
+			return;
+		}
+		const result = await res.json();
+		if (result.success) {
+			setGlobalErrorMessage(`Alle Benutzer-Daten und Wetten wurden erfolgreich zurückgesetzt.`, true);
+		} else if (result.message) setGlobalErrorMessage(result.message);
+	}
 </script>
 
 <Navbar>
@@ -223,6 +238,9 @@
 				<input type="checkbox" bind:checked={is_public} on:click={setWebsiteState} />
 				<span class="slider round" />
 			</label>
+		</li>
+		<li class="item" style="flex-direction: column;">
+			<button class="action_ban delete" on:click={onGlobalReset}>Alles Zurücksetzten</button>
 		</li>
 		<li class="item" style="margin: 0;">
 			<p id="error" bind:this={global_error}>{global_error_msg}</p>
@@ -357,14 +375,14 @@
 	.submit {
 		border: none;
 		margin-top: 5px;
-		padding: 5px 0;
+		padding: 6px 0;
 		min-width: max(125px, 30%);
 		border-radius: 25px;
 		cursor: pointer;
 		font-weight: bold;
 		color: #22c522;
 		background-color: white;
-		font-size: 1rem;
+		font-size: 1.1rem;
 	}
 
 	.submit:hover {

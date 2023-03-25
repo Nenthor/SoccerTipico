@@ -1,4 +1,5 @@
 import { getAllUsers, updateUser } from '$lib/server/database';
+import { settings } from '$lib/server/settings';
 import { updateLeaderboard } from '$lib/server/websocket';
 import type { RequestHandler } from './$types';
 
@@ -15,6 +16,11 @@ export const POST = (async ({ request }) => {
 
 	let finished = 0;
 	users.forEach((user) => {
+		if (!settings.public && !user.isAdmin) {
+			finished++;
+			if (finished == users.length) updateLeaderboard();
+			return;
+		}
 		if (user.total_points + points < 0) user.total_points = 0;
 		else user.total_points += points;
 		if (user.points + points < 0) user.points = 0;

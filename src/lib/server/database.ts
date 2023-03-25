@@ -114,7 +114,7 @@ export async function getAllClosedBets() {
 
 export async function updateBet(id: string, bet: Bet) {
 	try {
-		const record = await pb.collection('bets').update(id, bet);
+		const record = await pb.collection('bets').update(id, bet, { $autoCancel: false });
 		return extractBet(record);
 	} catch (error) {
 		return null;
@@ -133,7 +133,7 @@ export async function createBet(question: string, choices: string[], timelimit: 
 		timelimit
 	};
 	try {
-		const record = await pb.collection('bets').create(data);
+		const record = await pb.collection('bets').create(data, { $autoCancel: false });
 		return extractBet(record);
 	} catch (error) {
 		return null;
@@ -142,7 +142,7 @@ export async function createBet(question: string, choices: string[], timelimit: 
 
 export async function deleteBet(bet: Bet) {
 	try {
-		await pb.collection('bets').delete(bet.id);
+		await pb.collection('bets').delete(bet.id, { $autoCancel: false });
 		return true;
 	} catch (error) {
 		if (error instanceof ClientResponseError && error.status == 404) {
@@ -182,15 +182,17 @@ export async function getAllUsers(sorted: boolean = false) {
 	}
 }
 
+let ranking: User[];
 let leaders: User[];
 export async function getLeaders(flush: boolean = false) {
 	if (leaders && !flush) return leaders;
 	try {
-		const records = await pb.collection('users').getList(1, 10, {
+		const records = await pb.collection('users').getFullList(200, {
 			filter: 'isAdmin = false && isBanned = false',
 			sort: '-total_points,username'
 		});
-		leaders = extractUsers(records.items);
+		ranking = extractUsers(records);
+		leaders = ranking.slice(0, 10);
 		return leaders;
 	} catch (error) {
 		return null;
@@ -207,9 +209,14 @@ export function getLowestLeader() {
 	return leaders[leaders.length - 1];
 }
 
+export function getRanking(id: string) {
+	if (!ranking) return -1;
+	return ranking.findIndex((u) => u.id == id);
+}
+
 export async function updateUser(id: string, user: User) {
 	try {
-		const record = await pb.collection('users').update(id, user);
+		const record = await pb.collection('users').update(id, user, { $autoCancel: false });
 		return extractUser(record);
 	} catch (error) {
 		if (error instanceof ClientResponseError && error.status == 404) {
@@ -232,7 +239,7 @@ export async function createUser(username: string, password: string) {
 		isAdmin: false
 	};
 	try {
-		const record = await pb.collection('users').create(data);
+		const record = await pb.collection('users').create(data, { $autoCancel: false });
 		return extractUser(record);
 	} catch (error) {
 		return null;
@@ -241,7 +248,7 @@ export async function createUser(username: string, password: string) {
 
 export async function deleteUser(user: User) {
 	try {
-		await pb.collection('users').delete(user.id);
+		await pb.collection('users').delete(user.id, { $autoCancel: false });
 		return true;
 	} catch (error) {
 		if (error instanceof ClientResponseError && error.status == 404) {

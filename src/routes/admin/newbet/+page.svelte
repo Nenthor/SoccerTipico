@@ -1,11 +1,17 @@
 <script lang="ts">
 	import Footer from '$lib/Footer.svelte';
 	import Navbar from '$lib/Navbar.svelte';
+	import { onMount } from 'svelte';
 
 	let choices = 0;
 	let question: string;
 	let options: string[] = [];
 	let timelimit_min: number;
+
+	let autoFocus: HTMLElement;
+	onMount(() => {
+		if (autoFocus) autoFocus.focus();
+	});
 
 	async function onSubmit() {
 		if (!question) {
@@ -24,11 +30,11 @@
 		let new_options: string[] = [];
 		if (choices == 0) new_options = ['yes', 'no'];
 		else new_options = options.slice(0, choices);
-		if (!timelimit_min) {
+		if (!timelimit_min && timelimit_min != 0) {
 			setErrorMessage('Gebe ein Zeitfenster an.');
 			return;
-		} else if (timelimit_min < 3) {
-			setErrorMessage('Das Zeitfenster kann min. 3 Minuten sein.');
+		} else if (timelimit_min < 1 && timelimit_min != 0) {
+			setErrorMessage('Das Zeitfenster muss min. 2 Minuten sein.');
 			return;
 		} else if (timelimit_min > 10) {
 			setErrorMessage('Das Zeitfenster kann max. 10 Minuten sein.');
@@ -36,6 +42,7 @@
 		}
 		let new_timelimit = new Date();
 		new_timelimit.setMinutes(new_timelimit.getMinutes() + timelimit_min);
+		if (timelimit_min == 0) new_timelimit.setDate(new_timelimit.getDate() + 1);
 
 		const res = await fetch('/api/bet/create', { method: 'POST', headers: { question, choices: JSON.stringify(new_options), timelimit: new_timelimit.toJSON() } });
 		if (!res) {
@@ -71,7 +78,7 @@
 <div class="content_box">
 	<h1 class="title">Neue Wette erstellen</h1>
 	<form action="" class="form">
-		<input type="text" class="input" placeholder="Wettfrage" style="width: 80%; margin-bottom: 20px" bind:value={question} />
+		<input type="text" class="input" placeholder="Wettfrage" style="width: 80%; margin-bottom: 20px" bind:this={autoFocus} bind:value={question} />
 
 		<div class="choices">
 			<p class="choices_title">Auswahlmöglichkeiten</p>
@@ -104,7 +111,7 @@
 		{/if}
 		<p style="color:white; margin-top: 10px">Zeitfenster</p>
 		<div class="timelimit_box">
-			<input type="number" class="input" placeholder="x" style="text-align: center; width: 25px" bind:value={timelimit_min} />
+			<input type="number" class="input" placeholder="x" style="text-align: center; width: 25px" bind:value={timelimit_min} title="0 = 1d Laufzeit || 2-10min Laufzeit" />
 			<p>Minuten</p>
 		</div>
 		<p id="error" bind:this={error}>{error_msg}</p>
@@ -232,14 +239,14 @@
 	.submit {
 		border: none;
 		margin-top: 5px;
-		padding: 5px 0;
+		padding: 8px 0;
 		min-width: 50%;
 		border-radius: 25px;
 		cursor: pointer;
 		font-weight: bold;
 		color: #1e9c1e;
 		background-color: white;
-		font-size: 1rem;
+		font-size: 1.1rem;
 	}
 
 	.submit:hover {

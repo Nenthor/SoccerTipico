@@ -34,6 +34,7 @@ export const POST = (async ({ request }) => {
 		const index = user.bets.findIndex((b) => b.id == bet.id);
 		if (index == -1) {
 			finished++;
+			if (finished == users.length) updateLeaderboard();
 			continue;
 		}
 

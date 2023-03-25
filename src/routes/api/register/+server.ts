@@ -1,5 +1,5 @@
 import { createUser, getLowestLeader, getUserByName } from '$lib/server/database';
-import { getSessionManger } from '$lib/server/session';
+import { sessionManager } from '$lib/server/session';
 import { updateLeaderboard } from '$lib/server/websocket';
 import { randomBytes, scryptSync } from 'crypto';
 import type { RequestHandler } from './$types';
@@ -13,12 +13,13 @@ export const POST = (async ({ request, cookies }) => {
 	if (!username_raw || !password_raw || !checkData(username_raw, password_raw)) return getResponse(false, 'Ungültige Benutzerdaten.');
 	if (!(await checkUsername(username_raw))) return getResponse(false, 'Benutzername ist bereits vergeben.');
 
-	const username = username_raw.trim();
+	const username = correctUsername(username_raw.trim());
+
 	const password = generateHash(password_raw.trim());
 	const user = await createUser(username, password);
 
 	if (!user) return getResponse(false, 'Der Server ist momentan überlastet.');
-	const { error } = await getSessionManger().createNewSession(cookies, { userID: user.id });
+	const { error } = await sessionManager.createNewSession(cookies, { userID: user.id });
 	if (error) return getResponse(false, 'Der Server ist momentan überlastet.');
 
 	if ((getLowestLeader()?.total_points || 0) < user.total_points) updateLeaderboard();
@@ -43,6 +44,13 @@ function checkData(username: string, password: string) {
 async function checkUsername(username: string) {
 	const user = await getUserByName(username);
 	return user == null;
+}
+
+function correctUsername(username: string) {
+	let [vor, nach] = username.split(' ');
+	vor = vor[0].toUpperCase() + vor.slice(1);
+	nach = nach[0].toUpperCase() + nach.slice(1);
+	return `${vor} ${nach}`;
 }
 
 function generateHash(input: string) {

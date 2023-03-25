@@ -1,11 +1,9 @@
-import { getSessionManger } from '$lib/server/session';
+import { sessionManager } from '$lib/server/session';
 import type { RequestHandler } from './$types';
 
 export const POST = (async ({ cookies }) => {
-	const sessionManger = getSessionManger();
-
-	const { error } = await sessionManger.delSession(cookies);
-	if (error) await sessionManger.deleteCookie(cookies);
+	const { error } = await sessionManager.delSession(cookies);
+	if (error) await sessionManager.deleteCookie(cookies);
 
 	if (error) return getResponse(false, 'Der Server ist momentan überlastet.');
 	else return getResponse(true);

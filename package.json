@@ -1,6 +1,6 @@
 {
-	"name": "spccertipico",
-	"version": "0.0.1",
+	"name": "soccertipico",
+	"version": "1.0",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev --host",

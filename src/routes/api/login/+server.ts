@@ -1,5 +1,5 @@
 import { getUserByName } from '$lib/server/database';
-import { getSessionManger } from '$lib/server/session';
+import { sessionManager } from '$lib/server/session';
 import { timingSafeEqual, scryptSync } from 'crypto';
 import type { RequestHandler } from './$types';
 
@@ -20,7 +20,7 @@ export const POST = (async ({ request, cookies }) => {
 
 	if (user == null) return getResponse(false, 'Benutzername ist nicht vergeben.');
 	if (!checkPassword(password, user.password)) return getResponse(false, 'Ungültiges Passwort.');
-	const { error } = await getSessionManger().createNewSession(cookies, { userID: user.id });
+	const { error } = await sessionManager.createNewSession(cookies, { userID: user.id });
 	if (error) return getResponse(false, 'Der Server ist momentan überlastet.');
 
 	return getResponse(true);

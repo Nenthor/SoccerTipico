@@ -27,6 +27,7 @@
 	let choices_images: { [id: string]: HTMLImageElement } = {};
 	let bet_state = 'Geöffnet';
 	let refresh_bet_rate = false;
+	let view = false;
 	let bet_time: HTMLDivElement;
 	let socket: WebSocket | null;
 	onMount(() => {
@@ -58,26 +59,18 @@
 					}
 					values = values;
 					break;
+				case 'bet_timelimit':
+					const new_timelimit = JSON.parse(msg[1]);
+					if (!new_timelimit) break;
+					timelimit = new Date(new_timelimit);
+					setTimer(true);
+					break;
 				default:
 					break;
 			}
 		});
 
-		//Bet timer
-		let time_diff = (timelimit.getTime() - new Date().getTime()) / 1000; //difference in s
-		let delay = 0;
-
-		if (time_diff <= 0) {
-			delay = 0;
-			time_diff = 0;
-		} else if (time_diff > 300) {
-			delay = time_diff - 300;
-			time_diff = 300;
-		}
-
-		bet_time.innerHTML = `<div><style>@keyframes bet_timer { from { transform: translateX(-${100 - (time_diff / 300) * 100}%); } to { transform: translateX(-100%); } }</style></div>`;
-		bet_time.style.width = '100%';
-		bet_time.style.animation = `bet_timer ${time_diff}s linear ${delay}s 1 normal forwards`;
+		setTimer();
 	});
 
 	if (data.success && data.bet && data.user) {
@@ -86,6 +79,7 @@
 		question = bet.question;
 		points = user.points;
 		bet_id = bet.id;
+		view = data.view == 'true';
 		timelimit = new Date(bet.timelimit);
 
 		for (let index in bet.choices) {
@@ -106,15 +100,51 @@
 			placed_choice = placed_bet.choice;
 			selected_choice = placed_choice;
 		}
+	}
 
-		const remaining_time = new Date(bet.timelimit).getTime() - new Date().getTime();
+	let bet_timeout: any;
+	function setTimer(update = false) {
+		if (!bet_time) return;
+
+		let time_diff = (timelimit.getTime() - new Date().getTime()) / 1000; //difference in s
+		let delay = 0;
+
+		if (time_diff <= 0) {
+			delay = 0;
+			time_diff = 0;
+		} else if (time_diff > 300) {
+			delay = time_diff - 300;
+			time_diff = 300;
+		}
+
+		if (bet_time.innerHTML) {
+			bet_time.style.width = '0%';
+			bet_time.style.animation = 'none';
+			bet_time.innerHTML = '';
+		}
+		if (update) {
+			setTimeout(() => {
+				bet_time.innerHTML = `<div><style>@keyframes bet_timer { from { transform: translateX(-${100 - (time_diff / 300) * 100}%); } to { transform: translateX(-100%); } }</style></div>`;
+				bet_time.style.width = '100%';
+				bet_time.style.animation = `bet_timer ${time_diff}s linear ${delay}s 1 normal forwards`;
+			}, 1);
+		} else {
+			bet_time.innerHTML = `<div><style>@keyframes bet_timer { from { transform: translateX(-${100 - (time_diff / 300) * 100}%); } to { transform: translateX(-100%); } }</style></div>`;
+			bet_time.style.width = '100%';
+			bet_time.style.animation = `bet_timer ${time_diff}s linear ${delay}s 1 normal forwards`;
+		}
+
+		const remaining_time = timelimit.getTime() - new Date().getTime();
 		if (remaining_time <= 0) {
 			bet_state = 'Geschlossen';
-		} else
-			setTimeout(() => {
+		} else {
+			if (bet_timeout) clearTimeout(bet_timeout);
+			bet_timeout = setTimeout(() => {
 				bet_state = 'Geschlossen';
 			}, remaining_time);
+		}
 	}
+
 	function getColor(index: number) {
 		if (isYesNo && choices[index] == 'yes') return '#1e9c1e';
 		else if (isYesNo && choices[index] == 'no') return '#9c1e1e';
@@ -253,13 +283,13 @@
 
 <Navbar>
 	<li>
-		<a href="/dashboard" on:click|preventDefault={() => location.replace('/dashboard')}>Zurück</a>
+		<a href="/dashboard" on:click|preventDefault={() => location.replace(view ? `/admin/bet?id=${bet_id}` : '/dashboard')}>Zurück</a>
 	</li>
 </Navbar>
 
 <div class="content_box">
-	<h2 id="bet_title">{question}</h2>
-	<div class="bet_stats">
+	<h2 class={view ? 'view_title' : ''} id="bet_title">{question}</h2>
+	<div class="bet_stats {view ? 'view_stats' : ''}">
 		<h2 id="bet_value">Im Topf:<br /><span style="color:#ebc107; text-shadow: 0 0 3px #161616;">{getValueString(total_value)}</span></h2>
 		<ul class="bet_answers" id="bet_answer_list">
 			{#each values as value, index}
@@ -268,8 +298,8 @@
 		</ul>
 	</div>
 	<div class="bet_choices_box">
-		<h2 class="bet_choices_title">Wettoptionen</h2>
-		<ul class="bet_choices">
+		<h2 class="bet_choices_title {view ? 'view_subtitle' : ''}">Wettoptionen</h2>
+		<ul class="bet_choices {view ? 'view_choices' : ''}">
 			{#each choices as choice, index}
 				{#if isYesNo}
 					<li class="bet_choice">
@@ -286,73 +316,75 @@
 			{/each}
 		</ul>
 	</div>
-	<div class="decision_box">
-		<h2 class="decision_title">Status: {bet_state}</h2>
-		<div class="decision_amount_box">
-			{#if bet_state == 'Geöffnet'}
-				<p class="decision_amount_title">Wähle deine Wette:</p>
-			{:else}
-				<p class="decision_amount_title">Abgeschlossene Wette:</p>
-			{/if}
-			<div class="decision_choices">
-				{#if placed_choice == -1 && bet_state == 'Geöffnet'}
-					{#each choices as choice, index}
-						{#if isYesNo}
-							<button
-								class="decision_choice decision_choice_yesno"
-								on:click={() => onSetYesNoChoice(index, choice == 'yes')}
-								bind:this={choices_elements[index]}
-								style="color:{getColor(index)}; border-color={getColor(index)};"
-								><img src={getColoredYesNoImage(choice == 'yes')} bind:this={choices_images[index]} alt={choice} width="35" height="35" /></button
-							>
-						{:else}
-							<button class="decision_choice" on:click={() => onSetChoice(index)} bind:this={choices_elements[index]} style="color:{getColor(index)}; border-color={getColor(index)};"
-								>{getChoiceCharIndex(index)}</button
-							>
-						{/if}
-					{/each}
+	{#if !view}
+		<div class="decision_box">
+			<h2 class="decision_title">Status: {bet_state}</h2>
+			<div class="decision_amount_box">
+				{#if bet_state == 'Geöffnet'}
+					<p class="decision_amount_title">Wähle deine Wette:</p>
 				{:else}
-					{#each choices as choice, index}
-						{#if isYesNo}
-							{#if placed_choice == index}
-								<button class="decision_choice decision_choice_yesno" bind:this={choices_elements[index]} style="background-color:{getColor(index)}; border-color:{getColor(index)}; cursor: default;"
-									><img src={getYesNoImage(choice == 'yes')} bind:this={choices_images[index]} alt={choice} width="35" height="35" /></button
+					<p class="decision_amount_title">Abgeschlossene Wette:</p>
+				{/if}
+				<div class="decision_choices">
+					{#if placed_choice == -1 && bet_state == 'Geöffnet'}
+						{#each choices as choice, index}
+							{#if isYesNo}
+								<button
+									class="decision_choice decision_choice_yesno"
+									on:click={() => onSetYesNoChoice(index, choice == 'yes')}
+									bind:this={choices_elements[index]}
+									style="color:{getColor(index)}; border-color={getColor(index)};"
+									><img src={getColoredYesNoImage(choice == 'yes')} bind:this={choices_images[index]} alt={choice} width="35" height="35" /></button
 								>
 							{:else}
-								<button class="decision_choice decision_choice_yesno" bind:this={choices_elements[index]} style="background-color:#888; border-color:#646464; cursor: default;"
-									><img src={getColoredYesNoImage(choice == 'yes')} bind:this={choices_images[index]} alt={choice} width="35" height="35" /></button
+								<button class="decision_choice" on:click={() => onSetChoice(index)} bind:this={choices_elements[index]} style="color:{getColor(index)}; border-color={getColor(index)};"
+									>{getChoiceCharIndex(index)}</button
+								>
+							{/if}
+						{/each}
+					{:else}
+						{#each choices as choice, index}
+							{#if isYesNo}
+								{#if placed_choice == index}
+									<button class="decision_choice decision_choice_yesno" bind:this={choices_elements[index]} style="background-color:{getColor(index)}; border-color:{getColor(index)}; cursor: default;"
+										><img src={getYesNoImage(choice == 'yes')} bind:this={choices_images[index]} alt={choice} width="35" height="35" /></button
+									>
+								{:else}
+									<button class="decision_choice decision_choice_yesno" bind:this={choices_elements[index]} style="background-color:#888; border-color:#646464; cursor: default;"
+										><img src={getColoredYesNoImage(choice == 'yes')} bind:this={choices_images[index]} alt={choice} width="35" height="35" /></button
+									>{/if}
+							{:else if placed_choice == index}
+								<button class="decision_choice" bind:this={choices_elements[index]} style="background-color:{getColor(index)}; color: #fff; border-color:{getColor(index)}; cursor: default;"
+									>{getChoiceCharIndex(index)}</button
+								>
+							{:else}<button class="decision_choice" bind:this={choices_elements[index]} style="color:{getColor(index)}; background-color: #888; border-color:#646464; cursor: default;"
+									>{getChoiceCharIndex(index)}</button
 								>{/if}
-						{:else if placed_choice == index}
-							<button class="decision_choice" bind:this={choices_elements[index]} style="background-color:{getColor(index)}; color: #fff; border-color:{getColor(index)}; cursor: default;"
-								>{getChoiceCharIndex(index)}</button
-							>
-						{:else}<button class="decision_choice" bind:this={choices_elements[index]} style="color:{getColor(index)}; background-color: #888; border-color:#646464; cursor: default;"
-								>{getChoiceCharIndex(index)}</button
-							>{/if}
-					{/each}
+						{/each}
+					{/if}
+				</div>
+				{#if bet_state == 'Geöffnet'}
+					<input
+						type="number"
+						bind:value={bet_amount}
+						use:validateAmount={bet_amount}
+						placeholder={placed_amount == 0 ? 'Wetteinsatz' : `${placed_amount}`}
+						id="decision_amount_input"
+						min="0"
+						max="9999999"
+					/>
+				{:else}
+					<p class="closed_amount">Wetteinsatz: {placed_amount}</p>
+				{/if}
+
+				{#if bet_state == 'Geöffnet'}
+					<p id="error" bind:this={error_element}>{error_message}</p>
+					<button class="decision_submit" on:click={submitBet}>Wette abschließen</button>
+					<div class="bet_time" bind:this={bet_time} />
 				{/if}
 			</div>
-			{#if bet_state == 'Geöffnet'}
-				<input
-					type="number"
-					bind:value={bet_amount}
-					use:validateAmount={bet_amount}
-					placeholder={placed_amount == 0 ? 'Wetteinsatz' : `${placed_amount}`}
-					id="decision_amount_input"
-					min="0"
-					max="9999999"
-				/>
-			{:else}
-				<p class="closed_amount">Wetteinsatz: {placed_amount}</p>
-			{/if}
-
-			{#if bet_state == 'Geöffnet'}
-				<p id="error" bind:this={error_element}>{error_message}</p>
-				<button class="decision_submit" on:click={submitBet}>Wette abschließen</button>
-				<div class="bet_time" bind:this={bet_time} />
-			{/if}
 		</div>
-	</div>
+	{/if}
 </div>
 
 <Footer />
@@ -460,6 +492,7 @@
 		height: 25px;
 		padding: 3px;
 		margin-right: 10px;
+		font-size: 16px;
 	}
 
 	.decision_box {
@@ -597,6 +630,29 @@
 		border: 3px solid transparent;
 		background-color: white;
 		cursor: default;
+	}
+
+	.view_title {
+		font-size: clamp(2.5rem, 10vw, 3rem) !important;
+	}
+
+	.view_subtitle {
+		font-size: clamp(1.5rem, 5vw, 2rem) !important;
+	}
+
+	.view_stats {
+		background-color: red;
+		width: min(1500px, calc(100% - 20px));
+		height: 100px;
+	}
+
+	.view_stats h2 {
+		font-size: 2rem !important;
+	}
+
+	.view_choices {
+		font-size: 2rem;
+		width: 400px;
 	}
 
 	@media screen and (max-width: 700px) {
