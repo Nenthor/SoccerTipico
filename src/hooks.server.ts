@@ -1,6 +1,6 @@
 import { getUser } from '$lib/server/database';
 import { sessionManager } from '$lib/server/session';
-import { error, redirect, type Cookies, type Handle } from '@sveltejs/kit';
+import { redirect, type Cookies, type Handle } from '@sveltejs/kit';
 import config from '$lib/server/data/config.json' assert { type: 'json' };
 import { setupWebsocketServer } from '$lib/server/websocket';
 import { settings } from '$lib/server/settings';
@@ -12,7 +12,7 @@ import('$lib/server/websocket'); // Setup Websocket-Server
 let firstConnection = false;
 
 const noAuthAllowedRoutes = ['/authentication', '/api/register', '/api/login'];
-const alwaysAllowedRouts = ['/datenschutz'];
+const alwaysAllowedRouts = ['/datenschutz', '/error'];
 const adminRoutes = [
 	'/admin',
 	'/admin/user',
@@ -46,7 +46,7 @@ export const handle: Handle = (async ({ event, resolve }) => {
 			if (userSession.error) {
 				if (event.request.method != 'GET') return new Response(JSON.stringify({ success: false, message: 'Nicht berechtigt.' }), { status: 401 });
 				throw redirect(307, '/authentication');
-			} else if (rateLimitBurst(event.cookies)) throw error(429, { message: 'Too Many Requests' });
+			} else if (rateLimitBurst(event.cookies)) throw redirect(307, '/error');
 
 			//Is authenticated
 			const user = await getUser(userSession.data.userID);
@@ -101,7 +101,7 @@ function rateLimitBurst(cookies: Cookies) {
 		});
 	} else {
 		const request_count_int = parseInt(request_count);
-		if (isNaN(request_count_int) || request_count_int > 8) return true;
+		if (isNaN(request_count_int) || request_count_int > 5) return true;
 		cookies.set('request_count', `${request_count_int + 1}`, {
 			secure: true,
 			path: '/',
