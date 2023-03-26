@@ -32,24 +32,19 @@ export const POST = (async ({ request }) => {
 	let finished = 0;
 	for (const user of users) {
 		const index = user.bets.findIndex((b) => b.id == bet.id);
-		if (index == -1) {
-			finished++;
-			if (finished == users.length) updateLeaderboard();
-			continue;
-		}
+		if (index != -1) {
+			const placed_bet = user.bets.splice(index, 1)[0];
 
-		const placed_bet = user.bets[index];
-
-		user.total_points -= placed_bet.value;
-		if (placed_bet.choice == correct_choice) {
-			//User has won bet
-			const winnings = Math.ceil((placed_bet.value / bet_value) * pot_value);
-			user.total_points += winnings;
-			user.points += winnings;
+			user.total_points -= placed_bet.value;
+			if (placed_bet.choice == correct_choice) {
+				//User has won bet
+				const winnings = Math.ceil((placed_bet.value / bet_value) * pot_value);
+				user.total_points += winnings;
+				user.points += winnings;
+			}
 		}
 		user.history.push({ id: bet.id, points: user.total_points });
 
-		user.bets.splice(index, 1);
 		updateUser(user.id, user).then(() => {
 			finished++;
 			if (finished == users.length) updateLeaderboard();

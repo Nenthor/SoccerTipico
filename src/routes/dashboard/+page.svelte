@@ -56,21 +56,20 @@
 					}
 
 					const index = user.bets.findIndex((b) => b.id == bet_result.id);
-					if (index == -1) break; // User did not bet
+					if (index != -1) {
+						//User did bet
+						const placed_bet = user.bets.splice(index, 1)[0];
 
-					const placed_bet = user.bets[index];
-
-					placed_value -= placed_bet.value;
-					profit -= placed_bet.value;
-					if (placed_bet.choice == bet_result.choice) {
-						//User has won bet
-						const winnings = Math.ceil((placed_bet.value / bet_result.bet_value) * bet_result.pot_value);
-						user.points += winnings;
-						profit += winnings;
+						placed_value -= placed_bet.value;
+						profit -= placed_bet.value;
+						if (placed_bet.choice == bet_result.choice) {
+							//User has won bet
+							const winnings = Math.ceil((placed_bet.value / bet_result.bet_value) * bet_result.pot_value);
+							user.points += winnings;
+							profit += winnings;
+						}
 					}
-
 					updateChart({ id: bet_result.id, points: profit + user.default_points });
-					user.bets.splice(index, 1);
 					break;
 				case 'bet_timelimit':
 					const new_timelimit = JSON.parse(msg[1]);
