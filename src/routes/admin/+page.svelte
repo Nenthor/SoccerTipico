@@ -11,10 +11,11 @@
 	let admin: User;
 	let users: User[];
 	let users_search: User[];
-	const command_search = ['@admin', '@banned', '@new'];
+	const command_search = ['@admin', '@banned', '@new', '@rich', '@bankrupt'];
 	let is_command = false;
 	let bets: Bet[];
 	let bets_search: Bet[];
+	let total_points = 0;
 
 	if (data.success && data.users && data.bets) {
 		admin = JSON.parse(data.user);
@@ -50,6 +51,16 @@
 					users_search = [...users].sort((u1, u2) => new Date(u2.created).getTime() - new Date(u1.created).getTime());
 					const search = search_user.slice('@new'.length).trim();
 					if (search) users_search = users_search.filter((u) => u.username.toLowerCase().includes(search.toLowerCase()));
+				} else if (search_user.toLowerCase().startsWith('@rich')) {
+					is_command = false;
+					users_search = [...users].sort((u1, u2) => u2.total_points - u1.total_points);
+					const search = search_user.slice('@rich'.length).trim();
+					if (search) users_search = users_search.filter((u) => u.username.toLowerCase().includes(search.toLowerCase()));
+				} else if (search_user.toLowerCase().startsWith('@bankrupt')) {
+					is_command = false;
+					users_search = users.filter((u) => u.total_points == 0);
+					const search = search_user.slice('@bankrupt'.length).trim();
+					if (search) users_search = users_search.filter((u) => u.username.toLowerCase().includes(search.toLowerCase()));
 				}
 			} else {
 				is_command = false;
@@ -75,6 +86,15 @@
 		if (user.isAdmin) color = 'background-color: #00ffeab6;';
 		if (user.isBanned) color = 'background-color: #ff0000b6;';
 		return color;
+	}
+
+	function getValueString(value: number) {
+		if (value < 1000) return value;
+
+		const value_string = value.toString();
+		const value_thousand = value_string.substring(0, value_string.length - 3);
+		const value_houndred = value_string.substring(value_string.length - 3, value_string.length - 2);
+		return `${value_thousand},${value_houndred}k`;
 	}
 
 	function showUser(user: User): any {
@@ -110,6 +130,7 @@
 		];
 
 		for (const user of users) {
+			total_points += user.total_points;
 			if (user.isAdmin || user.isBanned) continue;
 			const i = points_distribution.findIndex((d) => user.total_points < d.max_value);
 			if (i != -1) points_distribution[i].amount++;
@@ -186,6 +207,7 @@
 	</div>
 	<br />
 	<h2 class="container_title">Kapitalverteilung</h2>
+	<p class="container_subtitle">Insgesamt: {getValueString(total_points)}</p>
 	<div class="bet_chart">
 		<canvas bind:this={canvas} />
 	</div>
@@ -236,7 +258,16 @@
 		width: 100%;
 		text-align: center;
 		color: white;
-		margin: 20px 0;
+		margin-top: 25px;
+	}
+
+	.container_subtitle {
+		width: 100%;
+		text-align: center;
+		color: #999;
+		font-style: italic;
+		font-size: 0.85rem;
+		margin: 2px 0 10px 0;
 	}
 
 	.search {
