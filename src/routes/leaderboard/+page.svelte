@@ -92,7 +92,7 @@
 			{#each leaders as leader, index}
 				<li class="leader_item">
 					<div class="container rand"><p class="leader_text ranking" style={getStyle(index)}>#{index + 1}</p></div>
-					<div class="container center"><h2 class="leader_text leader_name">{leader.username}</h2></div>
+					<div class="container center"><h2 class="leader_text leader_name {self.username == leader.username ? 'leader_self' : ''}">{leader.username}</h2></div>
 					<div class="container rand"><p class="leader_text">{getValueString(leader.total_points)}</p></div>
 				</li>
 			{/each}
@@ -102,7 +102,7 @@
 				{/if}
 				<li class="leader_item">
 					<div class="container rand"><p class="leader_text ranking">#{ranking + 1}</p></div>
-					<div class="container center"><h2 class="leader_text leader_name">{self.username}</h2></div>
+					<div class="container center"><h2 class="leader_text leader_name leader_self">{self.username}</h2></div>
 					<div class="container rand"><p class="leader_text">{getValueString(self.total_points)}</p></div>
 				</li>
 			{/if}
@@ -194,6 +194,10 @@
 		width: 95%;
 		overflow-wrap: break-word;
 		color: aqua;
+	}
+
+	.leader_self {
+		color: orange;
 	}
 
 	.dots {
