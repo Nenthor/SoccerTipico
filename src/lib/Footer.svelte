@@ -14,6 +14,7 @@
 	}
 	footer p {
 		font-family: roboto;
+		text-align: center;
 		font-size: 0.95rem;
 		color: #161616;
 	}

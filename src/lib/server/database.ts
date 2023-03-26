@@ -15,6 +15,7 @@ export class User {
 	points: number;
 	bets: PlacedBet[];
 	history: HistoryItem[];
+	created: string;
 	isBanned: boolean;
 	isAdmin: boolean;
 
@@ -27,6 +28,7 @@ export class User {
 		points: number,
 		bets: PlacedBet[],
 		history: HistoryItem[],
+		created: string,
 		isBanned: boolean,
 		isAdmin: boolean
 	) {
@@ -38,6 +40,7 @@ export class User {
 		this.points = points;
 		this.bets = bets;
 		this.history = history;
+		this.created = created;
 		this.isBanned = isBanned;
 		this.isAdmin = isAdmin;
 	}
@@ -267,7 +270,19 @@ function extractUsers(records: Record[]) {
 }
 
 function extractUser(record: Record) {
-	return new User(record.id, record.username, record.username_filter, record.password, record.total_points, record.points, record.bets, record.history, record.isBanned, record.isAdmin);
+	return new User(
+		record.id,
+		record.username,
+		record.username_filter,
+		record.password,
+		record.total_points,
+		record.points,
+		record.bets,
+		record.history,
+		record.created,
+		record.isBanned,
+		record.isAdmin
+	);
 }
 
 function extractBets(records: Record[]) {

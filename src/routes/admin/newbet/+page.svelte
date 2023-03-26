@@ -52,6 +52,7 @@
 		const result = await res.json();
 		if (result.success) {
 			setErrorMessage('Wette wurde erfolgreich erstellt.', true);
+			setTimeout(() => {location.href = '/admin';}, 5000);
 		} else if (result.message) setErrorMessage(result.message);
 	}
 

@@ -11,6 +11,8 @@
 	let admin: User;
 	let users: User[];
 	let users_search: User[];
+	const command_search = ['@admin', '@banned', '@new'];
+	let is_command = false;
 	let bets: Bet[];
 	let bets_search: Bet[];
 
@@ -31,12 +33,32 @@
 
 	function searchUser() {
 		if (search_user) {
-			if (search_user.toLowerCase().startsWith('@admin')) {
-				users_search = users.filter((u) => u.isAdmin);
-			} else if (search_user.toLowerCase().startsWith('@banned')) {
-				users_search = users.filter((u) => u.isBanned);
-			} else users_search = users.filter((u) => u.username.toLowerCase().includes(search_user.toLowerCase()));
-		} else users_search = users;
+			if (search_user.startsWith('@')) {
+				is_command = true;
+				if (search_user.toLowerCase().startsWith('@admin')) {
+					is_command = false;
+					users_search = users.filter((u) => u.isAdmin);
+					const search = search_user.slice('@admin'.length).trim();
+					if (search) users_search = users_search.filter((u) => u.username.toLowerCase().includes(search.toLowerCase()));
+				} else if (search_user.toLowerCase().startsWith('@banned')) {
+					is_command = false;
+					users_search = users.filter((u) => u.isBanned);
+					const search = search_user.slice('@banned'.length).trim();
+					if (search) users_search = users_search.filter((u) => u.username.toLowerCase().includes(search.toLowerCase()));
+				} else if (search_user.toLowerCase().startsWith('@new')) {
+					is_command = false;
+					users_search = [...users].sort((u1, u2) => new Date(u2.created).getTime() - new Date(u1.created).getTime());
+					const search = search_user.slice('@new'.length).trim();
+					if (search) users_search = users_search.filter((u) => u.username.toLowerCase().includes(search.toLowerCase()));
+				}
+			} else {
+				is_command = false;
+				users_search = users.filter((u) => u.username.toLowerCase().includes(search_user.toLowerCase()));
+			}
+		} else {
+			is_command = false;
+			users_search = users;
+		}
 	}
 
 	let search_bet: string;
@@ -132,11 +154,19 @@
 			<h2 class="container_title">Benutzer ({users_search.length})</h2>
 			<input type="text" class="search" placeholder="Benutzer suchen..." bind:value={search_user} />
 			<div class="scroler user_container">
-				{#each users_search as user}
-					<button class="scroler_Element" style={bg(user)} on:click={() => showUser(user)}>
-						<p>{user.username}</p>
-					</button>
-				{/each}
+				{#if is_command}
+					{#each command_search as command}
+						<button class="scroler_Element" on:click={() => (search_user = command)}>
+							<p>{command}</p>
+						</button>
+					{/each}
+				{:else}
+					{#each users_search as user}
+						<button class="scroler_Element" style={bg(user)} on:click={() => showUser(user)}>
+							<p>{user.username}</p>
+						</button>
+					{/each}
+				{/if}
 			</div>
 		</div>
 		<div class="container">
@@ -154,7 +184,7 @@
 			</div>
 		</div>
 	</div>
-	<br/>
+	<br />
 	<h2 class="container_title">Kapitalverteilung</h2>
 	<div class="bet_chart">
 		<canvas bind:this={canvas} />
@@ -258,7 +288,7 @@
 	}
 
 	.bet_chart {
-		width: clamp(300px, 80%, 750px);
+		width: min(80%, 750px);
 		background-color: #323232;
 		border-radius: 25px;
 		aspect-ratio: 3 / 2;
@@ -279,6 +309,10 @@
 			display: flex;
 			flex-direction: column;
 			align-items: center;
+		}
+
+		.bet_chart {
+			width: calc(100% - 30px);
 		}
 	}
 </style>

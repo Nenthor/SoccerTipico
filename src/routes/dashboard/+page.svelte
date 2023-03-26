@@ -56,11 +56,7 @@
 					}
 
 					const index = user.bets.findIndex((b) => b.id == bet_result.id);
-					if (index == -1) {
-						// User did not bet
-						updateChart({ id: bet_result.id, points: profit + user.default_points });
-						break;
-					}
+					if (index == -1) break; // User did not bet
 
 					const placed_bet = user.bets[index];
 
@@ -215,7 +211,7 @@
 				datasets: [
 					{
 						data: history.map((row) => row.points),
-						borderColor: 'transparent',
+						borderColor: '#398dd1',
 						pointBorderColor: 'transparent',
 						pointBackgroundColor: 'transparent',
 						backgroundColor: '#398dd1',
@@ -299,14 +295,6 @@
 <Footer />
 
 <style>
-	.bet_chart {
-		width: clamp(300px, 80%, 750px);
-		background-color: #323232;
-		border-radius: 25px;
-		aspect-ratio: 3 / 2;
-		padding: 10px;
-	}
-
 	.content_box {
 		margin-top: 75px;
 		padding: 10px 0;
@@ -449,6 +437,14 @@
 		background-color: #ee3232;
 	}
 
+	.bet_chart {
+		width: min(80%, 750px);
+		background-color: #323232;
+		border-radius: 25px;
+		aspect-ratio: 3 / 2;
+		padding: 10px;
+	}
+
 	@media screen and (max-width: 600px) {
 		.stats {
 			flex-direction: column;
@@ -467,6 +463,10 @@
 
 		.bet_item {
 			flex-direction: column;
+		}
+
+		.bet_chart {
+			width: calc(100% - 30px);
 		}
 	}
 </style>

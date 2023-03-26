@@ -158,6 +158,9 @@
 				finished = true;
 				remaining_time = 0;
 				setErrorMessage('Wette erfolgreich ausgeschüttet.', true);
+				setTimeout(() => {
+					location.href = '/admin';
+				}, 5000);
 			} else if (result.message) setErrorMessage(result.message);
 		}
 	}
@@ -180,6 +183,13 @@
 				remaining_time = timelimit_sec * 1000;
 			} else if (result.message) setTimeErrorMessage(result.message);
 		}
+	}
+
+	function getPercantage(value: number) {
+		const percantage = Math.round((value / total_value) * 100) || 0;
+		if (percantage > 100) return '100%';
+		else if (percantage == 0 && value != 0) return '< 1%';
+		else return `${percantage}%`;
 	}
 </script>
 
@@ -220,13 +230,13 @@
 			<li class="item">
 				{#if isYesNo}
 					<p style="display: flex; justify-content: center; align-items: center; ">
-						Anteil <img src={getYesNoImage(choice == 'yes')} alt={choice} style="background-color: {getColor(index)}; padding: 2px 2px; border-radius: 5px; margin-left: 5px;" width="20" height="20" />
+						<img src={getYesNoImage(choice == 'yes')} alt={choice} style="background-color: {getColor(index)}; padding: 2px 2px; border-radius: 5px; margin-left: 5px;" width="20" height="20" />
 					</p>
 				{:else}
 					<p>Anteil Option <span style="background-color: {getColor(index)}; padding: 2px 5px; border-radius: 5px;">{getChoiceCharIndex(index)}</span></p>
 				{/if}
 				<div class="line" />
-				<p>{Math.round((values[index] / total_value) * 100) || 0}%</p>
+				<p>{getPercantage(values[index])}</p>
 			</li>
 		{/each}
 		<li class="item">

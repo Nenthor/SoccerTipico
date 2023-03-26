@@ -10,6 +10,7 @@ declare global {
 			username: string;
 			bets: PlacedBet[];
 			history: HistoryItem[];
+			created: string;
 			total_points: number;
 			points: number;
 			default_points: number;

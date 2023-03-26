@@ -3,6 +3,7 @@ export interface User {
 	username: string;
 	bets: PlacedBet[];
 	history: HistoryItem[];
+	created: string;
 	default_points: number;
 	total_points: number;
 	points: number;
