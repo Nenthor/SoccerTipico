@@ -26,7 +26,12 @@ const adminRoutes = [
 	'/api/user/giveall',
 	'/api/user/rename',
 	'/api/user/status',
-	'/api/user/globalreset'
+	'/api/user/globalreset',
+	'/api/team/create',
+	'/api/team/delete',
+	'/api/match/create',
+	'/api/match/finish',
+	'/api/match/update'
 ];
 export const handle: Handle = (async ({ event, resolve }) => {
 	const userSession = await sessionManager.getSession(event.cookies);

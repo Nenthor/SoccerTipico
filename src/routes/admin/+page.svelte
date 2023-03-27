@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Footer from '$lib/Footer.svelte';
 	import Navbar from '$lib/Navbar.svelte';
-	import type { Bet, User } from '$lib/server/database';
+	import type { Bet, Match, Team, User } from '$lib/server/database';
 	import type { PageData } from './$types';
 	import { Chart, CategoryScale, BarController, LinearScale, BarElement, Filler } from 'chart.js';
 	import { onMount } from 'svelte';
@@ -11,18 +11,26 @@
 	let admin: User;
 	let users: User[];
 	let users_search: User[];
-	const command_search = ['@admin', '@banned', '@new', '@rich', '@bankrupt'];
-	let is_command = false;
 	let bets: Bet[];
 	let bets_search: Bet[];
+	let teams: Team[];
+	let teams_search: Team[];
+	let matches: Match[];
+	let matches_search: Match[];
+	const command_search = ['@admin', '@banned', '@new', '@rich', '@bankrupt'];
+	let is_command = false;
 	let total_points = 0;
 
-	if (data.success && data.users && data.bets) {
+	if (data.success && data.users && data.bets && data.teams && data.matches) {
 		admin = JSON.parse(data.user);
 		users = JSON.parse(data.users);
 		bets = JSON.parse(data.bets);
+		teams = JSON.parse(data.teams);
+		matches = JSON.parse(data.matches);
 		users_search = users;
 		bets_search = bets;
+		teams_search = teams;
+		matches_search = matches;
 
 		onMount(() => {
 			if (users) createChart();
@@ -81,6 +89,26 @@
 		} else bets_search = bets;
 	}
 
+	let search_team: string;
+	$: search_team, searchTeam();
+
+	function searchTeam() {
+		if (search_team) {
+			teams_search = teams.filter((t) => t.name.toLowerCase().includes(search_team.toLowerCase()));
+		} else teams_search = teams;
+	}
+
+	let search_match: string;
+	$: search_match, searchMatch();
+
+	function searchMatch() {
+		if (search_match) {
+			matches_search = matches.filter((m) => {
+				return m.team1?.name.toLowerCase().includes(search_match.toLowerCase()) || m.team2?.name.toLowerCase().includes(search_match.toLowerCase());
+			});
+		} else matches_search = matches;
+	}
+
 	function bg(user: User) {
 		let color = 'background-color: ;';
 		if (user.isAdmin) color = 'background-color: #00ffeab6;';
@@ -101,12 +129,28 @@
 		window.location.href = `/admin/user?id=${user.id}`;
 	}
 
+	function showTeam(team: Team) {
+		window.location.href = `/admin/team?id=${team.id}`;
+	}
+
+	function showMatch(match: Match) {
+		window.location.href = `/admin/match?id=${match.id}`;
+	}
+
 	function showBet(bet: Bet) {
 		window.location.href = `/admin/bet?id=${bet.id}`;
 	}
 
 	function newBet() {
 		window.location.href = '/admin/newbet';
+	}
+
+	function newTeam() {
+		window.location.href = `/admin/newteam`;
+	}
+
+	function newMatch() {
+		window.location.href = `/admin/newmatch`;
 	}
 
 	let canvas: HTMLCanvasElement;
@@ -171,37 +215,75 @@
 <div class="content">
 	<h1 id="admin_title">Adminpanel von <span style="color:#3bc5e7">{admin?.username || 'Anonym'}</span></h1>
 	<div class="containers">
-		<div class="container">
-			<h2 class="container_title">Benutzer ({users_search.length})</h2>
-			<input type="text" class="search" placeholder="Benutzer suchen..." bind:value={search_user} />
-			<div class="scroler user_container">
-				{#if is_command}
-					{#each command_search as command}
-						<button class="scroler_Element" on:click={() => (search_user = command)}>
-							<p>{command}</p>
-						</button>
-					{/each}
-				{:else}
-					{#each users_search as user}
-						<button class="scroler_Element" style={bg(user)} on:click={() => showUser(user)}>
-							<p>{user.username}</p>
-						</button>
-					{/each}
-				{/if}
+		<div class="container_box">
+			<div class="container">
+				<h2 class="container_title">Benutzer ({users_search.length})</h2>
+				<input type="text" class="search" placeholder="Benutzer suchen..." bind:value={search_user} />
+				<div class="scroler user_container">
+					{#if is_command}
+						{#each command_search as command}
+							<button class="scroler_Element" on:click={() => (search_user = command)}>
+								<p>{command}</p>
+							</button>
+						{/each}
+					{:else}
+						{#each users_search as user}
+							<button class="scroler_Element" style={bg(user)} on:click={() => showUser(user)}>
+								<p>{user.username}</p>
+							</button>
+						{/each}
+					{/if}
+				</div>
 			</div>
 		</div>
-		<div class="container">
-			<h2 class="container_title">Wetten ({bets_search.length})</h2>
-			<input type="text" class="search" placeholder="Wette suchen..." bind:value={search_bet} />
-			<div class="scroler user_container">
-				<button class="scroler_Element" style="background-color: #00ffeab6;" on:click={() => newBet()}>
-					<div class="element_Part">Neue Wette</div>
-				</button>
-				{#each bets_search as bet}
-					<button class="scroler_Element" on:click={() => showBet(bet)}>
-						<p>{bet.question}</p>
+		<div class="container_box">
+			<div class="container">
+				<h2 class="container_title">Wetten ({bets_search.length})</h2>
+				<input type="text" class="search" placeholder="Wette suchen..." bind:value={search_bet} />
+				<div class="scroler user_container">
+					<button class="scroler_Element" style="background-color: #00ffeab6;" on:click={() => newBet()}>
+						<div class="element_Part">Neue Wette</div>
 					</button>
-				{/each}
+					{#each bets_search as bet}
+						<button class="scroler_Element" on:click={() => showBet(bet)}>
+							<p>{bet.question}</p>
+						</button>
+					{/each}
+				</div>
+			</div>
+		</div>
+		<div class="container_box">
+			<div class="container">
+				<h2 class="container_title">Teams ({teams_search.length})</h2>
+				<input type="text" class="search" placeholder="Team suchen..." bind:value={search_team} />
+				<div class="scroler user_container">
+					<button class="scroler_Element" style="background-color: #00ffeab6;" on:click={() => newTeam()}>
+						<div class="element_Part">Neues Team</div>
+					</button>
+					{#each teams_search as team}
+						<button class="scroler_Element" on:click={() => showTeam(team)}>
+							<p>{team.name}</p>
+						</button>
+					{/each}
+				</div>
+			</div>
+		</div>
+		<div class="container_box">
+			<div class="container">
+				<h2 class="container_title">Spiele ({matches_search.length})</h2>
+				<input type="text" class="search" placeholder="Spiel suchen..." bind:value={search_match} />
+				<div class="scroler user_container">
+					<button class="scroler_Element" style="background-color: #00ffeab6;" on:click={() => newMatch()}>
+						<div class="element_Part">Neues Spiel</div>
+					</button>
+					{#each matches_search as match}
+						{#if match.team1 && match.team2}
+							<button class="scroler_Element" on:click={() => showMatch(match)}>
+								<p>{match.team1.name} vs. {match.team2.name}</p>
+							</button>
+						{/if}
+					{/each}
+				</div>
 			</div>
 		</div>
 	</div>
@@ -237,15 +319,25 @@
 	}
 
 	.containers {
+		max-width: 1220px;
+		width: calc(100% - 20px);
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 20px;
+		padding: 0 10px;
+	}
+
+	.container_box {
 		width: 100%;
+		height: 100%;
 		display: flex;
+		justify-content: center;
 		align-items: center;
-		justify-content: space-around;
-		list-style: none;
 	}
 
 	.container {
-		width: 45%;
+		max-width: 600px;
+		width: 100%;
 		height: 60vh;
 		background-color: black;
 		border-radius: 10px;
@@ -328,18 +420,7 @@
 
 	@media screen and (max-width: 600px) {
 		.containers {
-			width: 100%;
-			display: flex;
-			list-style: none;
-			flex-direction: column;
-		}
-
-		.container {
-			width: 90%;
-			margin-top: 10px;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
+			grid-template-columns: repeat(1, 1fr);
 		}
 
 		.bet_chart {

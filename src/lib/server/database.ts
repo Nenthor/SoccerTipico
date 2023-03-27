@@ -51,18 +51,200 @@ export class Bet {
 	question: string;
 	choices: { [key: string]: number };
 	timelimit: Date;
+	match: Match | null;
 
-	constructor(id: string, question: string, choices: { [key: string]: number }, timelimit: Date) {
+	constructor(id: string, question: string, choices: { [key: string]: number }, timelimit: Date, match: Match | null) {
 		this.id = id;
 		this.question = question;
 		this.choices = choices;
 		this.timelimit = timelimit;
+		this.match = match;
+	}
+}
+
+export class Team {
+	id: string;
+	name: string;
+	goal_difference: number;
+	win: number;
+	draw: number;
+	lose: number;
+	group: string;
+
+	constructor(id: string, name: string, goal_difference: number, win: number, draw: number, lose: number, group: string) {
+		this.id = id;
+		this.name = name;
+		this.goal_difference = goal_difference;
+		this.win = win;
+		this.draw = draw;
+		this.lose = lose;
+		this.group = group;
+	}
+}
+
+export class Match {
+	id: string;
+	team1: Team | null;
+	team2: Team | null;
+	goals1: number;
+	goals2: number;
+
+	constructor(id: string, team1: Team | null, team2: Team | null, goals1: number, goals2: number) {
+		this.id = id;
+		this.team1 = team1;
+		this.team2 = team2;
+		this.goals1 = goals1;
+		this.goals2 = goals2;
+	}
+}
+
+export async function getMatch(id: string) {
+	try {
+		const record = await pb.collection('matches').getOne(id, { expand: 'team1,team2', $autoCancel: false });
+		return extractMatch(record);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function getMatchByTeamIDs(id1: string, id2: string) {
+	try {
+		const record = await pb.collection('matches').getFirstListItem(`team1.id="${id1}" && team2.id="${id2}" `, { expand: 'team1,team2', $autoCancel: false });
+		return extractMatch(record);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function getAllMatches() {
+	try {
+		const records = await pb.collection('matches').getFullList(100, { expand: 'team1,team2', $autoCancel: false });
+		return extractMatches(records);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function updateMatch(id: string, match: Match) {
+	if (!match.team1 || !match.team2) return null;
+	const data = {
+		team1: match.team1.id,
+		team2: match.team2.id,
+		goals1: match.goals1,
+		goals2: match.goals2
+	};
+	try {
+		const record = await pb.collection('matches').update(id, data, { expand: 'team1,team2', $autoCancel: false });
+		return extractMatch(record);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function createMatch(id1: string, id2: string) {
+	const data = {
+		team1: id1,
+		team2: id2,
+		goals1: 0,
+		goals2: 0
+	};
+	try {
+		const record = await pb.collection('matches').create(data, { expand: 'team1,team2', $autoCancel: false });
+		return extractMatch(record);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function deleteMatch(match: Match) {
+	try {
+		await pb.collection('matches').delete(match.id, { expand: 'team1,team2', $autoCancel: false });
+		return true;
+	} catch (error) {
+		if (error instanceof ClientResponseError && error.status == 404) {
+			return true;
+		}
+		return false;
+	}
+}
+
+export async function getTeam(id: string) {
+	try {
+		const record = await pb.collection('teams').getOne(id, { $autoCancel: false });
+		return extractTeam(record);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function getTeamByName(name: string) {
+	try {
+		const record = await pb.collection('teams').getFirstListItem(`name="${name}"`, { $autoCancel: false });
+		return extractTeam(record);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function getAllTeams() {
+	try {
+		const records = await pb.collection('teams').getFullList(100, { sort: 'name', $autoCancel: false });
+		return extractTeams(records);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function getAllTeamsInGroup(group: string) {
+	try {
+		const records = await pb.collection('teams').getFullList(100, { sort: 'name', filter: `group == "${group}"`, $autoCancel: false });
+		return extractTeams(records);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function updateTeam(id: string, team: Team) {
+	try {
+		const record = await pb.collection('teams').update(id, team, { $autoCancel: false });
+		return extractTeam(record);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function createTeam(name: string, group: string) {
+	const data = {
+		name,
+		goal_difference: 0,
+		win: 0,
+		draw: 0,
+		lose: 0,
+		group
+	};
+	try {
+		const record = await pb.collection('teams').create(data, { $autoCancel: false });
+		return extractTeam(record);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function deleteTeam(team: Team) {
+	try {
+		await pb.collection('teams').delete(team.id, { $autoCancel: false });
+		return true;
+	} catch (error) {
+		if (error instanceof ClientResponseError && error.status == 404) {
+			return true;
+		}
+		return false;
 	}
 }
 
 export async function getBet(id: string) {
 	try {
-		const record = await pb.collection('bets').getOne(id, { $autoCancel: false });
+		const record = await pb.collection('bets').getOne(id, { expand: 'match,match.team1,match.team2', $autoCancel: false });
 		return extractBet(record);
 	} catch (error) {
 		return null;
@@ -71,7 +253,7 @@ export async function getBet(id: string) {
 
 export async function getBetByQuestion(question: string) {
 	try {
-		const record = await pb.collection('bets').getFirstListItem(`question="${question}"`, { $autoCancel: false });
+		const record = await pb.collection('bets').getFirstListItem(`question="${question}"`, { expand: 'match,match.team1,match.team2', $autoCancel: false });
 		return extractBet(record);
 	} catch (error) {
 		return null;
@@ -80,7 +262,7 @@ export async function getBetByQuestion(question: string) {
 
 export async function getAllBets() {
 	try {
-		const records = await pb.collection('bets').getFullList(100, { sort: 'timelimit', $autoCancel: false });
+		const records = await pb.collection('bets').getFullList(100, { sort: 'timelimit', expand: 'match,match.team1,match.team2', $autoCancel: false });
 		return extractBets(records);
 	} catch (error) {
 		return null;
@@ -93,6 +275,7 @@ export async function getAllOpenBets() {
 		const records = await pb.collection('bets').getFullList(100, {
 			filter: `timelimit >= "${date}"`,
 			sort: 'timelimit',
+			expand: 'match,match.team1,match.team2',
 			$autoCancel: false
 		});
 		return extractBets(records);
@@ -107,6 +290,7 @@ export async function getAllClosedBets() {
 		const records = await pb.collection('bets').getFullList(100, {
 			filter: `timelimit < "${date}"`,
 			sort: 'timelimit',
+			expand: 'match,match.team1,match.team2',
 			$autoCancel: false
 		});
 		return extractBets(records);
@@ -116,15 +300,21 @@ export async function getAllClosedBets() {
 }
 
 export async function updateBet(id: string, bet: Bet) {
+	const data = {
+		question: bet.question,
+		choices: JSON.stringify(bet.choices),
+		timelimit: bet.timelimit,
+		match: bet.match?.id || null
+	};
 	try {
-		const record = await pb.collection('bets').update(id, bet, { $autoCancel: false });
+		const record = await pb.collection('bets').update(id, data, { expand: 'match,match.team1,match.team2', $autoCancel: false });
 		return extractBet(record);
 	} catch (error) {
 		return null;
 	}
 }
 
-export async function createBet(question: string, choices: string[], timelimit: Date) {
+export async function createBet(question: string, choices: string[], timelimit: Date, match: Match | null = null) {
 	const choices_obj: any[] = [];
 	for (const choice of choices) {
 		choices_obj.push({ [choice]: 0 });
@@ -133,10 +323,11 @@ export async function createBet(question: string, choices: string[], timelimit: 
 	const data = {
 		question,
 		choices: JSON.stringify(choices_obj),
-		timelimit
+		timelimit,
+		match: match?.id || null
 	};
 	try {
-		const record = await pb.collection('bets').create(data, { $autoCancel: false });
+		const record = await pb.collection('bets').create(data, { expand: 'match,match.team1,match.team2', $autoCancel: false });
 		return extractBet(record);
 	} catch (error) {
 		return null;
@@ -145,7 +336,7 @@ export async function createBet(question: string, choices: string[], timelimit: 
 
 export async function deleteBet(bet: Bet) {
 	try {
-		await pb.collection('bets').delete(bet.id, { $autoCancel: false });
+		await pb.collection('bets').delete(bet.id, { expand: 'match,match.team1,match.team2', $autoCancel: false });
 		return true;
 	} catch (error) {
 		if (error instanceof ClientResponseError && error.status == 404) {
@@ -286,13 +477,49 @@ function extractUser(record: Record) {
 }
 
 function extractBets(records: Record[]) {
-	let users: Bet[] = [];
+	let bets: Bet[] = [];
 	for (let i = 0; i < records.length; i++) {
-		users.push(extractBet(records[i]));
+		bets.push(extractBet(records[i]));
 	}
-	return users;
+	return bets;
 }
 
 function extractBet(record: Record) {
-	return new Bet(record.id, record.question, record.choices, record.timelimit);
+	let match: Match | null = null;
+	if (record.expand.match && !(record.expand.match instanceof Array)) {
+		match = extractMatch(record.expand.match);
+	}
+	return new Bet(record.id, record.question, record.choices, record.timelimit, match);
+}
+
+function extractTeams(records: Record[]) {
+	let teams: Team[] = [];
+	for (let i = 0; i < records.length; i++) {
+		teams.push(extractTeam(records[i]));
+	}
+	return teams;
+}
+
+function extractTeam(record: Record) {
+	return new Team(record.id, record.name, record.goal_difference, record.win, record.draw, record.lose, record.group);
+}
+
+function extractMatches(records: Record[]) {
+	let matches: Match[] = [];
+	for (let i = 0; i < records.length; i++) {
+		matches.push(extractMatch(records[i]));
+	}
+	return matches;
+}
+
+function extractMatch(record: Record) {
+	let team1: Team | null = null;
+	let team2: Team | null = null;
+	if (record.expand.team1 && !(record.expand.team1 instanceof Array)) {
+		team1 = extractTeam(record.expand.team1);
+	}
+	if (record.expand.team2 && !(record.expand.team2 instanceof Array)) {
+		team2 = extractTeam(record.expand.team2);
+	}
+	return new Match(record.id, team1, team2, record.goals1, record.goals2);
 }
