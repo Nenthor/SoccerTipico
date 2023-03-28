@@ -86,6 +86,14 @@
 						open_bets = open_bets;
 					}
 					break;
+				case 'bonus':
+					const bonus_str = JSON.parse(msg[1]);
+					if (!bonus_str || isNaN(parseInt(bonus_str))) break;
+					const bonus = parseInt(bonus_str);
+					user.points += bonus;
+					profit += bonus;
+					updateChart({ id: 'bonus', points: profit + user.default_points });
+					break;
 				default:
 					break;
 			}
@@ -168,6 +176,9 @@
 	}
 
 	async function onLogout() {
+		const valid = confirm('Willst du dich wirklich abmelden?');
+		if (!valid) return;
+
 		const res = await fetch(`/api/logout`, { method: 'POST' });
 		if (!res) {
 			console.error('Der Server ist momentan nicht erreichbar.');

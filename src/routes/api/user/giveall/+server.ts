@@ -1,6 +1,6 @@
 import { getAllUsers, updateUser } from '$lib/server/database';
 import { settings } from '$lib/server/settings';
-import { updateLeaderboard } from '$lib/server/websocket';
+import { sendToDashboard, updateLeaderboard } from '$lib/server/websocket';
 import type { RequestHandler } from './$types';
 
 export const POST = (async ({ request }) => {
@@ -18,7 +18,10 @@ export const POST = (async ({ request }) => {
 	users.forEach((user) => {
 		if (!settings.public && !user.isAdmin) {
 			finished++;
-			if (finished == users.length) updateLeaderboard();
+			if (finished == users.length) {
+				sendToDashboard(`bonus==${points}`);
+				updateLeaderboard();
+			}
 			return;
 		}
 		if (user.total_points + points < 0) user.total_points = 0;
@@ -27,6 +30,7 @@ export const POST = (async ({ request }) => {
 		else user.points += points;
 		user.history.push({ id: 'Bonus', points: user.total_points });
 
+		sendToDashboard(`bonus==${points}`);
 		updateUser(user.id, user).then(() => {
 			finished++;
 			if (finished == users.length) updateLeaderboard();
