@@ -67,6 +67,7 @@ export function sendAll(message: string) {
  * @param message - `bet_new==[type Bet]`
  * @param message - `bet_result==[type BetResult]`
  * @param message - `bet_timelimit=={id: bet_id, timelimit: new_timelimit}`
+ * @param message - `bonus==[type number]`
  */
 export function sendToDashboard(message: string) {
 	if (!wss) return;
