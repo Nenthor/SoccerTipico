@@ -244,7 +244,7 @@
 		}
 		const result = await res.json();
 		if (result.success) {
-			setPanelErrorMessage('Das Zeitfenster wurde erfolgreich aktualisiert.', true);
+			setPanelErrorMessage('Bildschirm wurde erfolgreich aktualisiert.', true);
 		} else if (result.message) setPanelErrorMessage(result.message);
 	}
 
@@ -351,32 +351,31 @@
 				</div>
 				<p id="error_panel" bind:this={error_panel}>{error_panel_msg}</p>
 			</li>
-			{#if !bet.match_id}
+			<li class="item" style="flex-direction: column;">
+				<p style="margin-bottom: 5px;">Wähle die Gewinn-Option:</p>
+				<div class="decision_choices">
+					{#each choices as choice, index}
+						{#if isYesNo}
+							<button
+								class="decision_choice decision_choice_yesno"
+								on:click={() => onSetYesNoChoice(index, choice == 'yes')}
+								bind:this={choices_elements[index]}
+								style="color:{getColor(index)}; border-color={getColor(index)};"
+								><img src={getColoredYesNoImage(choice == 'yes')} bind:this={choices_images[index]} alt={choice} width="35" height="35" /></button
+							>
+						{:else}
+							<button class="decision_choice" on:click={() => onSetChoice(index)} bind:this={choices_elements[index]} style="color:{getColor(index)}; border-color={getColor(index)};"
+								>{getChoiceCharIndex(index)}</button
+							>
+						{/if}
+					{/each}
+				</div>
+				<p id="error" bind:this={error}>{error_msg}</p>
+				<button class="submit" on:click={onDecision}>Wette ausschütten</button>
+			</li>
+			{#if bet.match_id}
 				<li class="item" style="flex-direction: column;">
-					<p style="margin-bottom: 5px;">Wähle die Gewinn-Option:</p>
-					<div class="decision_choices">
-						{#each choices as choice, index}
-							{#if isYesNo}
-								<button
-									class="decision_choice decision_choice_yesno"
-									on:click={() => onSetYesNoChoice(index, choice == 'yes')}
-									bind:this={choices_elements[index]}
-									style="color:{getColor(index)}; border-color={getColor(index)};"
-									><img src={getColoredYesNoImage(choice == 'yes')} bind:this={choices_images[index]} alt={choice} width="35" height="35" /></button
-								>
-							{:else}
-								<button class="decision_choice" on:click={() => onSetChoice(index)} bind:this={choices_elements[index]} style="color:{getColor(index)}; border-color={getColor(index)};"
-									>{getChoiceCharIndex(index)}</button
-								>
-							{/if}
-						{/each}
-					</div>
-					<p id="error" bind:this={error}>{error_msg}</p>
-					<button class="submit" on:click={onDecision}>Wette ausschütten</button>
-				</li>
-			{:else}
-				<li class="item" style="flex-direction: column;">
-					<a class="view" href="/bet?id={bet.id}&view=true" on:click|preventDefault={() => location.replace(`/admin/match?id=${bet.match_id}&view=true`)}>Spiel ansehen</a>
+					<a class="view" href="/admin/match?id=${bet.match_id}" on:click|preventDefault={() => location.replace(`/admin/match?id=${bet.match_id}`)}>Spiel ansehen</a>
 				</li>
 			{/if}
 		</ul>

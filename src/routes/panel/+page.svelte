@@ -67,7 +67,6 @@
 		}
 
 		setInterval(nextSlide, 30000);
-		show = 'groups';
 	});
 </script>
 

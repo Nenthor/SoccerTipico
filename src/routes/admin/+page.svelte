@@ -288,6 +288,11 @@
 		</div>
 	</div>
 	<br />
+	<div class="view_box">
+		<a class="view" href="/panel?id=1" on:click|preventDefault={() => location.replace(`/panel?id=1`)}>Bildschirm 1</a>
+		<a class="view" href="/panel?id=2" on:click|preventDefault={() => location.replace(`/panel?id=2`)}>Bildschirm 2</a>
+	</div>
+	<br />
 	<h2 class="container_title">Kapitalverteilung</h2>
 	<p class="container_subtitle">Insgesamt: {getValueString(total_points)}</p>
 	<div class="bet_chart">
@@ -418,6 +423,37 @@
 		padding: 10px;
 	}
 
+	.view_box {
+		color: white;
+		width: min(100%, 400px);
+		margin: 10px 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: row;
+	}
+
+	.view {
+		border: none;
+		margin-top: 5px;
+		padding: 8px;
+		margin: 0 10px;
+		min-width: max(200px, 50%);
+		border-radius: 25px;
+		cursor: pointer;
+		font-weight: bold;
+		color: #1eb3d8;
+		background-color: white;
+		font-size: 1.1rem;
+		text-align: center;
+		text-decoration: none;
+	}
+
+	.view:hover {
+		background-color: #1eb3d8;
+		color: white;
+	}
+
 	@media screen and (max-width: 600px) {
 		.containers {
 			grid-template-columns: repeat(1, 1fr);
@@ -425,6 +461,15 @@
 
 		.bet_chart {
 			width: calc(100% - 30px);
+		}
+
+		.view_box {
+			flex-direction: column;
+			margin: 0;
+		}
+
+		.view {
+			margin: 10px;
 		}
 	}
 </style>
