@@ -233,6 +233,7 @@
 				<button class="decision_choice" on:click={() => onSetDisplay(1)} bind:this={displays[1]} style="color:#3bc5e7; border-color=#3bc5e7; min-width: 45px;">1</button>
 				<button class="decision_choice" on:click={() => onSetDisplay(2)} bind:this={displays[2]} style="color:#3bc5e7; border-color=#3bc5e7; min-width: 45px;">2</button>
 			</div>
+			<p class="error" id="error_panel" bind:this={error_panel}>{error_panel_msg}</p>
 		</div>
 		<li class="item" style="flex-direction: column;">
 			<button class="submit delete" on:click={deleteMatch}>Spiel Löschen</button>
@@ -376,6 +377,7 @@
 		color: #cd3232;
 		overflow-wrap: break-word;
 		width: clamp(200px, 50vw, 500px);
+		margin-top: 3px;
 	}
 
 	.item {

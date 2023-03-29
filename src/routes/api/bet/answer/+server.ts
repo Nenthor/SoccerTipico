@@ -55,12 +55,8 @@ export const POST = (async ({ request }) => {
 	const bet_result: BetResult = { id: bet.id, choice: correct_choice, bet_value, pot_value };
 	sendToDashboard(`bet_result==${JSON.stringify(bet_result)}`);
 
-	if (getPanelData('1')?.bet?.id == bet.id) {
-		updatePanelBet('1', null);
-	}
-	if (getPanelData('2')?.bet?.id == bet.id) {
-		updatePanelBet('2', null);
-	}
+	if (getPanelData('1')?.bet?.id == bet.id) updatePanelBet('1', null, true);
+	if (getPanelData('2')?.bet?.id == bet.id) updatePanelBet('2', null, true);
 
 	if (!(await deleteBet(bet))) return getResponse(false, `Der Server ist momentan überlastet.`);
 	return getResponse(true);

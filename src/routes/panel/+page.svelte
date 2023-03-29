@@ -1,9 +1,10 @@
 <script lang="ts">
-	import Leaderboard from '$lib/Leaderboard.svelte';
+	import Leaderboard from './Leaderboard.svelte';
+	import BetBar from './BetBar.svelte';
 	import Navbar from '$lib/Navbar.svelte';
 	import Footer from '$lib/Footer.svelte';
 	import type { Team, Match, User } from '$lib/server/database';
-	import type { Leader, PanelData } from '$lib/Types';
+	import type { Bet, Leader, PanelData } from '$lib/Types';
 	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
 
@@ -11,9 +12,9 @@
 
 	let self: User;
 	let leaders: Leader[];
-	let ranking = -1;
 	let panel_data: PanelData;
 	let groups: string[] = [];
+	let bet: Bet;
 	let show: 'leaderboard' | 'groups' | 'standings' = 'leaderboard';
 
 	if (data.success && data.leaders && data.panel_data) {
@@ -30,6 +31,7 @@
 			}
 			groups.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 		}
+		if (panel_data.bet) bet = panel_data.bet;
 	}
 
 	let socket: WebSocket | null;
@@ -46,6 +48,19 @@
 			switch (msg[0]) {
 				case 'update':
 					panel_data = JSON.parse(msg[1]);
+
+					if (panel_data.match_history && panel_data.match_history.length > 15) {
+						panel_data.match_history = panel_data.match_history.slice(0, 15);
+						panel_data = panel_data;
+					}
+					if (panel_data.bet) bet = panel_data.bet;
+					break;
+				case 'leaderboard':
+					const new_leaders: Leader[] = JSON.parse(msg[1]);
+					if (new_leaders && new_leaders.length < 10) {
+						new_leaders.push(...Array(10 - new_leaders.length).fill({ username: '-', total_points: 0 }));
+					}
+					if (new_leaders) leaders = new_leaders;
 					break;
 				default:
 					break;
@@ -70,7 +85,7 @@
 	});
 </script>
 
-<Navbar />
+<!--Navbar /-->
 <div class="content">
 	<div class="container">
 		<div class="slides">
@@ -94,10 +109,10 @@
 								{#each panel_data.teams as team}
 									{#if team.group == group}
 										<tr>
-											<th>{team.name}</th>
-											<th>{team.lose + team.draw + team.win}</th>
-											<th>{team.goal_difference}</th>
-											<th>{team.win * 3 + team.draw * 1}</th>
+											<td>{team.name}</td>
+											<td>{team.lose + team.draw + team.win}</td>
+											<td>{team.goal_difference}</td>
+											<td>{team.win * 3 + team.draw * 1}</td>
 										</tr>
 									{/if}
 								{/each}
@@ -113,17 +128,19 @@
 					<table class="groupTable">
 						<thead>
 							<tr>
-								<th>Team 1</th>
+								<th>Manschaft 1</th>
 								<th>Ergebnis</th>
-								<th>Team 2</th>
+								<th>Manschaft 2</th>
 							</tr>
 						</thead>
-						{#if panel_data && panel_data.match}
-							<tr>
-								<th>{panel_data.match.team1.name}</th>
-								<th>{panel_data.match.goals1} : {panel_data.match.goals2}</th>
-								<th>{panel_data.match.team2.name}</th>
-							</tr>
+						{#if panel_data && panel_data.match_history}
+							{#each panel_data.match_history as match}
+								<tr>
+									<td>{match.team1.name}</td>
+									<td>{match.goals1} : {match.goals2}</td>
+									<td>{match.team2.name}</td>
+								</tr>
+							{/each}
 						{/if}
 					</table>
 				</div>
@@ -133,20 +150,34 @@
 	<div class="container">
 		<div class="parts">
 			<div class="part">
-				<p>2</p>
+				<p>
+					{#if panel_data && panel_data.match}
+						{panel_data.match.goals1}
+					{:else}
+						-
+					{/if}
+				</p>
 				<p>:</p>
-				<p>1</p>
+				<p>
+					{#if panel_data && panel_data.match}
+						{panel_data.match.goals2}
+					{:else}
+						-
+					{/if}
+				</p>
 			</div>
-			<div class="part" id="dasAndereDind"><h1>text</h1></div>
+			{#if panel_data && panel_data.bet && bet}
+				<div class="part" id="dasAndereDind"><BetBar {bet} /></div>
+			{/if}
 		</div>
 	</div>
 </div>
-<Footer />
 
+<!--Footer /-->
 <style>
 	.content {
-		margin-top: 75px;
-		padding: 20px 0;
+		/*margin-top: 75px;
+		padding: 20px 0;*/
 		width: 100%;
 		background-color: #161616;
 		display: flex;
@@ -184,7 +215,7 @@
 		border-collapse: collapse;
 	}
 
-	.groupTable th {
+	.groupTable th, .groupTable td {
 		border-color: #fff;
 		border-width: 1px;
 		border-style: solid;
@@ -214,9 +245,7 @@
 	}
 
 	#dasAndereDind {
-		background-color: blue;
 		height: 60vh;
-		display: none;
 	}
 
 	@media screen and (max-width: 600px) {

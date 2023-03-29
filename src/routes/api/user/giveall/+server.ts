@@ -16,14 +16,6 @@ export const POST = (async ({ request }) => {
 
 	let finished = 0;
 	users.forEach((user) => {
-		if (!settings.public && !user.isAdmin) {
-			finished++;
-			if (finished == users.length) {
-				sendToDashboard(`bonus==${points}`);
-				updateLeaderboard();
-			}
-			return;
-		}
 		if (user.total_points + points < 0) user.total_points = 0;
 		else user.total_points += points;
 		if (user.points + points < 0) user.points = 0;

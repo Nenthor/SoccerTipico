@@ -1,5 +1,5 @@
-import { getAllTeams, getMatch, updateMatch, updateTeam } from '$lib/server/database';
-import { getPanelData, updatePanelMatch, updatePanelTeams } from '$lib/server/settings';
+import { getAllMatches, getAllTeams, getMatch, updateMatch, updateTeam } from '$lib/server/database';
+import { getPanelData, refreshPanel, updatePanelMatch, updatePanelMatchHistory, updatePanelTeams } from '$lib/server/settings';
 import type { RequestHandler } from './$types';
 
 export const POST = (async ({ request }) => {
@@ -40,16 +40,14 @@ export const POST = (async ({ request }) => {
 	match = await updateMatch(match.id, match);
 	if (!match) return getResponse(false, `Der Server ist momentan überlastet.`);
 
-	if (getPanelData('1')?.match?.id == match.id) {
-		updatePanelMatch('1', match);
-	}
-	if (getPanelData('2')?.match?.id == match.id) {
-		updatePanelMatch('2', match);
-	}
-	getAllTeams().then((teams) => {
-		if (!teams) return;
-		updatePanelTeams(teams);
-	});
+	if (getPanelData('1')?.match?.id == match.id) updatePanelMatch('1', match);
+	if (getPanelData('2')?.match?.id == match.id) updatePanelMatch('2', match);
+	const teams = await getAllTeams();
+	if (teams) updatePanelTeams(teams);
+	const history = await getAllMatches();
+	if (history) updatePanelMatchHistory(history);
+	refreshPanel('1');
+	refreshPanel('2');
 
 	return getResponse(true);
 }) satisfies RequestHandler;

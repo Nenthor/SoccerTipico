@@ -1,4 +1,4 @@
-import { createBet, getBetByQuestion, Match } from '$lib/server/database';
+import { createBet, getBetByQuestion } from '$lib/server/database';
 import { updatePanelBet } from '$lib/server/settings';
 import { sendToDashboard } from '$lib/server/websocket';
 import type { RequestHandler } from './$types';
@@ -27,9 +27,9 @@ export const POST = (async ({ request }) => {
 	sendToDashboard(`bet_new==${JSON.stringify(bet)}`);
 
 	if (panel_id == '3') {
-		updatePanelBet('1', bet);
-		updatePanelBet('2', bet);
-	} else if (panel_id != '-1') updatePanelBet(panel_id, bet);
+		updatePanelBet('1', bet, true);
+		updatePanelBet('2', bet, true);
+	} else if (panel_id != '-1') updatePanelBet(panel_id, bet, true);
 
 	return getResponse(true);
 }) satisfies RequestHandler;

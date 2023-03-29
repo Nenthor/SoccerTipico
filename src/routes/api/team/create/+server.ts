@@ -16,10 +16,8 @@ export const POST = (async ({ request }) => {
 	const team = await createTeam(name, group);
 	if (!team) return getResponse(false, `Der Server ist momentan überlastet.`);
 
-	getAllTeams().then((teams) => {
-		if (!teams) return;
-		updatePanelTeams(teams);
-	});
+	const teams = await getAllTeams();
+	if (teams) updatePanelTeams(teams, true);
 
 	return getResponse(true);
 }) satisfies RequestHandler;

@@ -9,6 +9,9 @@ export default defineConfig({
 		https: {
 			key: fs.readFileSync('./src/lib/server/data/private.pem'),
 			cert: fs.readFileSync('./src/lib/server/data/certificate.cer')
+		},
+		watch: {
+			ignored: ['**/settings.json']
 		}
 	},
 	plugins: [sveltekit(), viteCompression()]

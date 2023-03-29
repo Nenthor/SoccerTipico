@@ -1,4 +1,4 @@
-import { deleteTeam, getAllTeams, getTeam } from '$lib/server/database';
+import { getAllTeams, getTeam, updateTeam } from '$lib/server/database';
 import { updatePanelTeams } from '$lib/server/settings';
 import type { RequestHandler } from './$types';
 
@@ -12,7 +12,12 @@ export const POST = (async ({ request }) => {
 	const team = await getTeam(team_id);
 	if (!team) return getResponse(false, `Team existiert nicht.`);
 
-	const success = await deleteTeam(team);
+	team.win = 0;
+	team.draw = 0;
+	team.lose = 0;
+	team.goal_difference = 0;
+
+	const success = await updateTeam(team.id, team);
 	if (!success) return getResponse(false, `Der Server ist momentan überlastet.`);
 
 	const teams = await getAllTeams();

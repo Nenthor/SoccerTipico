@@ -62,7 +62,8 @@ export interface Team {
 }
 
 export interface PanelData {
-	teams: Team[] | null;
+	teams: Team[];
+	match_history: Match[];
 	match: Match | null;
 	bet: Bet | null;
 }

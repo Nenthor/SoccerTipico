@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import config from './data/config.json' assert { type: 'json' };
 import { getLeaders } from './database';
 import type { Leader } from '$lib/Types';
+import { getPanelData } from './settings';
 
 let wss: WebSocketServer;
 
@@ -93,8 +94,8 @@ export function sendToLeaderboard(message: string) {
 	for (const ws of leaderboard_sockets) {
 		if (ws.OPEN) ws.send(message);
 	}
-	if (panel_sockets['1'].OPEN) panel_sockets['1'].send(message);
-	if (panel_sockets['2'].OPEN) panel_sockets['2'].send(message);
+	sendToPanel('1', message);
+	sendToPanel('2', message);
 }
 
 /**

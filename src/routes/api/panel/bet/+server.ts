@@ -14,7 +14,7 @@ export const POST = (async ({ request }) => {
 	const bet = await getBet(bet_id);
 	if (!bet) return getResponse(false, `Wette existiert nicht.`);
 
-	updatePanelBet(panel_id, remove ? null : bet);
+	updatePanelBet(panel_id, remove ? null : bet, true);
 
 	return getResponse(true);
 }) satisfies RequestHandler;

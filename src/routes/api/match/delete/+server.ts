@@ -1,5 +1,5 @@
-import { deleteMatch, getMatch, updateTeam } from '$lib/server/database';
-import { getPanelData, updatePanelMatch } from '$lib/server/settings';
+import { deleteMatch, getAllMatches, getMatch, updateTeam } from '$lib/server/database';
+import { getPanelData, refreshPanel, updatePanelMatch, updatePanelMatchHistory } from '$lib/server/settings';
 import type { RequestHandler } from './$types';
 
 export const POST = (async ({ request }) => {
@@ -38,12 +38,12 @@ export const POST = (async ({ request }) => {
 	const success = await deleteMatch(match);
 	if (!success) return getResponse(false, `Der Server ist momentan überlastet.`);
 
-	if (getPanelData('1')?.match?.id == match.id) {
-		updatePanelMatch('1', null);
-	}
-	if (getPanelData('2')?.match?.id == match.id) {
-		updatePanelMatch('2', null);
-	}
+	if (getPanelData('1')?.match?.id == match.id) updatePanelMatch('1', match);
+	if (getPanelData('2')?.match?.id == match.id) updatePanelMatch('2', match);
+	const history = await getAllMatches();
+	if (history) updatePanelMatchHistory(history);
+	refreshPanel('1');
+	refreshPanel('2');
 
 	return getResponse(true);
 }) satisfies RequestHandler;

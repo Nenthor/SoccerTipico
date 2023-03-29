@@ -13,7 +13,7 @@ export const POST = (async ({ request }) => {
 	const match = await getMatch(match_id);
 	if (!match) return getResponse(false, `Spiel existiert nicht.`);
 
-	updatePanelMatch(panel_id, remove ? null : match);
+	updatePanelMatch(panel_id, remove ? null : match, true);
 
 	return getResponse(true);
 }) satisfies RequestHandler;

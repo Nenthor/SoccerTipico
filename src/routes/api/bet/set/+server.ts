@@ -81,6 +81,9 @@ function updateBetRate(bet: Bet | null) {
 
 	sendToBet(bet.id, `bet_rate==${JSON.stringify(bet.choices)}`);
 
+	if (getPanelData('1')?.bet?.id == bet.id) updatePanelBet('1', bet, true);
+	if (getPanelData('2')?.bet?.id == bet.id) updatePanelBet('2', bet, true);
+
 	update[bet.id] = null;
 	cooldown[bet.id] = true;
 	setTimeout(() => {

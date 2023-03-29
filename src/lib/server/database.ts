@@ -1,10 +1,19 @@
 import type { HistoryItem, PlacedBet } from '$lib/Types';
 import PocketBase, { ClientResponseError, Record } from 'pocketbase';
 import config from './data/config.json' assert { type: 'json' };
+import { setupSettings } from './settings';
 
 const pb = new PocketBase(`http://${config.PocketBase.ip}:${config.PocketBase.port}`);
 await pb.admins.authWithPassword(config.PocketBase.email, config.PocketBase.password);
 console.log('Connected to PocketBase');
+
+getAllMatches().then((matches) => {
+	getAllTeams().then((teams) => {
+		if (!teams) teams = [];
+		if (!matches) matches = [];
+		setupSettings(JSON.stringify(matches), JSON.stringify(teams));
+	});
+});
 
 export class User {
 	id: string;

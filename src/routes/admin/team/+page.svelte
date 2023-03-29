@@ -47,6 +47,32 @@
 			} else if (result.message) setErrorMessage(result.message);
 		}
 	}
+
+	async function resetTeam() {
+		const valid = confirm('Soll dieses Team wirklich zurückgesetzt werden?');
+		if (!valid) return;
+
+		if (!team) setErrorMessage('Team-ID nicht gefunden.');
+		else {
+			const res = await fetch('/api/team/reset', { method: 'POST', headers: { teamID: team.id } });
+			if (!res) {
+				setErrorMessage('Der Server ist momentan nicht erreichbar.');
+				return;
+			}
+			const result = await res.json();
+			if (result.success) {
+				setErrorMessage('Team erfolgreich zurückgesetzt.', true);
+				team.draw = 0;
+				team.win = 0;
+				team.lose = 0;
+				team.goal_difference = 0;
+				team = team;
+				setTimeout(() => {
+					window.location.href = '/admin';
+				}, 5000);
+			} else if (result.message) setErrorMessage(result.message);
+		}
+	}
 </script>
 
 <Navbar>
@@ -81,6 +107,9 @@
 	</ul>
 	<h2 class="actions_title">Aktionen</h2>
 	<ul class="actions_box">
+		<li class="item" style="flex-direction: column;">
+			<button class="submit reset" on:click={resetTeam}>Team zurücksetzen</button>
+		</li>
 		<li class="item" style="flex-direction: column;">
 			<button class="submit delete" on:click={deleteTeam}>Team löschen</button>
 			<p id="error" bind:this={error}>{error_msg}</p>
@@ -180,6 +209,14 @@
 
 	.delete:hover {
 		background-color: #750303;
+	}
+
+	.reset {
+		background-color: #c52222;
+	}
+
+	.reset:hover {
+		background-color: #9c1313;
 	}
 
 	#error {
