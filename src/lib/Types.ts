@@ -21,7 +21,7 @@ export interface Bet {
 	question: string;
 	choices: { [key: string]: number };
 	timelimit: string;
-	mathc: Match | null;
+	match_id: string | null;
 }
 
 export interface PlacedBet {
@@ -48,6 +48,7 @@ export interface Match {
 	team2: Team;
 	goals1: number;
 	goals2: number;
+	bet: Bet;
 }
 
 export interface Team {
@@ -58,4 +59,10 @@ export interface Team {
 	draw: number;
 	lose: number;
 	group: string;
+}
+
+export interface PanelData {
+	teams: Team[] | null;
+	match: Match | null;
+	bet: Bet | null;
 }

@@ -1,12 +1,14 @@
-import { getLeaders, getRanking } from '$lib/server/database';
+import { getLeaders } from '$lib/server/database';
+import { getPanelData } from '$lib/server/settings';
 import type { PageServerLoad } from './$types';
 
-export const load = (async ({ locals }) => {
+export const load = (async ({ url, locals }) => {
 	const leaders = await getUserSafeLeaders();
-	const ranking = getRanking(locals.id);
+	const panel_id = url.searchParams.get('id');
 
 	if (!leaders) return { success: true, user: JSON.stringify(locals) };
-	else return { success: true, user: JSON.stringify(locals), leaders: JSON.stringify(leaders), ranking: ranking.toString() };
+	if (!panel_id) return { success: true, user: JSON.stringify(locals), leaders: JSON.stringify(leaders) };
+	else return { success: true, user: JSON.stringify(locals), leaders: JSON.stringify(leaders), panel_data: JSON.stringify(getPanelData(panel_id)) };
 }) satisfies PageServerLoad;
 
 async function getUserSafeLeaders() {

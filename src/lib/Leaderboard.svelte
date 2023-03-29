@@ -1,10 +1,7 @@
 <script lang="ts">
-	import type { User } from '$lib/server/database';
 	import type { Leader } from '$lib/Types';
 
-	export let self: User;
 	export let leaders: Leader[];
-	export let ranking = -1;
 	const number_format = new Intl.NumberFormat();
 
 	function getValueString(value: number) {
@@ -23,18 +20,6 @@
 
 		return `background-color: ${podium_colors[index]}; text-shadow: 0 0 4px #161616;`;
 	}
-
-	async function updateRanking() {
-		const res = await fetch(`/api/user/ranking`, { method: 'POST' });
-		if (!res) {
-			console.error('Der Server ist momentan nicht erreichbar.');
-			return;
-		}
-		const result = await res.json();
-		if (result.success && result.message) {
-			ranking = parseInt(result.message);
-		} else if (result.message) console.error(result.message);
-	}
 </script>
 
 <h1 id="leadeboard_title">Rangliste</h1>
@@ -43,20 +28,10 @@
 		{#each leaders as leader, index}
 			<li class="leader_item">
 				<div class="container rand"><p class="leader_text ranking" style={getStyle(index)}>#{index + 1}</p></div>
-				<div class="container center"><h2 class="leader_text leader_name {self.username == leader.username ? 'leader_self' : ''}">{leader.username}</h2></div>
+				<div class="container center"><h2 class="leader_text leader_name">{leader.username}</h2></div>
 				<div class="container rand"><p class="leader_text">{getValueString(leader.total_points)}</p></div>
 			</li>
 		{/each}
-		{#if ranking > 10}
-			{#if ranking != 11}
-				<p class="dots">...</p>
-			{/if}
-			<li class="leader_item">
-				<div class="container rand"><p class="leader_text ranking">#{ranking + 1}</p></div>
-				<div class="container center"><h2 class="leader_text leader_name leader_self">{self.username}</h2></div>
-				<div class="container rand"><p class="leader_text">{getValueString(self.total_points)}</p></div>
-			</li>
-		{/if}
 	</ul>
 </div>
 
@@ -134,15 +109,5 @@
 		width: 95%;
 		overflow-wrap: break-word;
 		color: aqua;
-	}
-
-	.leader_self {
-		color: orange;
-	}
-
-	.dots {
-		color: white;
-		text-align: center;
-		font-size: 2rem;
 	}
 </style>

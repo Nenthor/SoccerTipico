@@ -35,7 +35,10 @@ const adminRoutes = [
 	'/api/team/delete',
 	'/api/match/create',
 	'/api/match/finish',
-	'/api/match/update'
+	'/api/match/update',
+	'/api/match/delete',
+	'/api/panel/bet',
+	'/api/panel/match'
 ];
 export const handle: Handle = (async ({ event, resolve }) => {
 	const userSession = await sessionManager.getSession(event.cookies);

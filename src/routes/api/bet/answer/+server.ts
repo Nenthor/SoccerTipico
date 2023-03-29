@@ -1,4 +1,5 @@
 import { deleteBet, getAllUsers, getBet, updateUser } from '$lib/server/database';
+import { getPanelData, updatePanelBet } from '$lib/server/settings';
 import { sendToDashboard, updateLeaderboard } from '$lib/server/websocket';
 import type { BetResult } from '$lib/Types';
 import type { RequestHandler } from './$types';
@@ -53,6 +54,13 @@ export const POST = (async ({ request }) => {
 
 	const bet_result: BetResult = { id: bet.id, choice: correct_choice, bet_value, pot_value };
 	sendToDashboard(`bet_result==${JSON.stringify(bet_result)}`);
+
+	if (getPanelData('1')?.bet?.id == bet.id) {
+		updatePanelBet('1', null);
+	}
+	if (getPanelData('2')?.bet?.id == bet.id) {
+		updatePanelBet('2', null);
+	}
 
 	if (!(await deleteBet(bet))) return getResponse(false, `Der Server ist momentan überlastet.`);
 	return getResponse(true);

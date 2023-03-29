@@ -1,4 +1,5 @@
-import { deleteTeam, getTeam } from '$lib/server/database';
+import { deleteTeam, getAllTeams, getTeam } from '$lib/server/database';
+import { updatePanelTeams } from '$lib/server/settings';
 import type { RequestHandler } from './$types';
 
 export const POST = (async ({ request }) => {
@@ -13,6 +14,11 @@ export const POST = (async ({ request }) => {
 
 	const success = await deleteTeam(team);
 	if (!success) return getResponse(false, `Der Server ist momentan überlastet.`);
+
+	getAllTeams().then((teams) => {
+		if (!teams) return;
+		updatePanelTeams(teams);
+	});
 
 	return getResponse(true);
 }) satisfies RequestHandler;

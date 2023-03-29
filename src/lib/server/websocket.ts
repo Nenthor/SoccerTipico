@@ -15,6 +15,7 @@ const ssl = {
 
 const dashboard_sockets: WebSocket[] = [];
 const leaderboard_sockets: WebSocket[] = [];
+const panel_sockets: { [panel_id: string]: WebSocket } = {};
 const bet_sockets: { [bet_id: string]: WebSocket[] } = {};
 
 export function setupWebsocketServer(port: number) {
@@ -38,6 +39,13 @@ export function setupWebsocketServer(port: number) {
 				if (bet_id) {
 					if (!bet_sockets[bet_id]) bet_sockets[bet_id] = [];
 					storeSocket(ws, bet_sockets[bet_id]);
+				} else ws.close();
+				break;
+			case '/panel':
+				const panel_id_str = url.searchParams.get('id');
+				if (panel_id_str && !isNaN(parseInt(panel_id_str))) {
+					const panel_id = parseInt(panel_id_str);
+					panel_sockets[panel_id] = ws;
 				} else ws.close();
 				break;
 			default:
@@ -85,6 +93,8 @@ export function sendToLeaderboard(message: string) {
 	for (const ws of leaderboard_sockets) {
 		if (ws.OPEN) ws.send(message);
 	}
+	if (panel_sockets['1'].OPEN) panel_sockets['1'].send(message);
+	if (panel_sockets['2'].OPEN) panel_sockets['2'].send(message);
 }
 
 /**
@@ -98,6 +108,16 @@ export function sendToBet(bet_id: string, message: string) {
 	for (const ws of bet_sockets[bet_id]) {
 		if (ws.OPEN) ws.send(message);
 	}
+}
+
+/**
+ * Send messages to all bet clients with same bet_id
+ * @param bet_id - Unique betId
+ * @param message - `update==[type PanelData]`
+ */
+export function sendToPanel(panel_id: string, message: string) {
+	if (!wss || !panel_sockets[panel_id]) return;
+	if (panel_sockets[panel_id].OPEN) panel_sockets[panel_id].send(message);
 }
 
 export function clearWebsocketBet(bet_id: string) {

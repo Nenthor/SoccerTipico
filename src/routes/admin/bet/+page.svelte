@@ -10,17 +10,20 @@
 	let self: User;
 	let error_msg = '';
 	let error_time_msg = '';
+	let error_panel_msg = '';
 	let total_value = 0;
 	let choices: string[] = [];
 	let values: number[] = [];
 	let remaining_time = 0;
 	let isYesNo = false;
 	let finished = false;
+	let selected_display = -1;
 	const colors = ['#2b6bc7', '#468629', '#d03542', '#d09f36'];
 
-	if (data.success && data.bet) {
+	if (data.success && data.bet && data.panel) {
 		bet = JSON.parse(data.bet);
 		self = JSON.parse(data.self);
+		selected_display = parseInt(data.panel);
 
 		remaining_time = new Date(bet.timelimit).getTime() - new Date().getTime();
 		if (remaining_time < 0) remaining_time = 0;
@@ -37,6 +40,10 @@
 			isYesNo = true;
 		}
 	}
+
+	onMount(() => {
+		updatePanel();
+	});
 
 	function getValueString(value: number) {
 		if (value < 1000) return value;
@@ -143,6 +150,18 @@
 		}, 5000);
 	}
 
+	let error_panel: HTMLElement;
+	let timeout_panel: any;
+	function setPanelErrorMessage(msg: string, success = false) {
+		if (timeout_panel) clearTimeout(timeout_panel);
+		error_panel_msg = msg;
+		if (success) error_panel.style.color = '#32cd32';
+		else error_panel.style.color = '#cd3232';
+		timeout_panel = setTimeout(() => {
+			error_panel_msg = '';
+		}, 5000);
+	}
+
 	async function onDecision() {
 		if (!bet) setErrorMessage('Bet-ID konnte nicht gefunden werden.');
 		else if (selected_choice == -1) setErrorMessage('Wähle die Gewinn-Option aus.');
@@ -190,6 +209,62 @@
 		if (percantage > 100) return '100%';
 		else if (percantage == 0 && value != 0) return '< 1%';
 		else return `${percantage}%`;
+	}
+
+	let displays: HTMLButtonElement[] = [];
+	async function onSetDisplay(id: number) {
+		let remove = false;
+		if (selected_display == id || selected_display == 3) {
+			const last_display = displays[id];
+			last_display.style.borderColor = last_display.style.backgroundColor;
+			last_display.style.color = last_display.style.backgroundColor;
+			last_display.style.backgroundColor = 'white';
+
+			if (selected_display == 3) {
+				selected_display = id == 1 ? 2 : 1;
+			} else selected_display = -1;
+
+			remove = true;
+		}
+
+		if (!remove) {
+			const display = displays[id];
+			display.style.backgroundColor = display.style.color;
+			display.style.borderColor = display.style.color;
+			display.style.color = 'white';
+
+			if (selected_display == -1) selected_display = id;
+			else selected_display = 3;
+		}
+
+		const res = await fetch('/api/panel/bet', { method: 'POST', headers: { betID: bet.id, panelID: id.toString(), remove: `${remove}` } });
+		if (!res) {
+			setPanelErrorMessage('Der Server ist momentan nicht erreichbar.');
+			return;
+		}
+		const result = await res.json();
+		if (result.success) {
+			setPanelErrorMessage('Das Zeitfenster wurde erfolgreich aktualisiert.', true);
+		} else if (result.message) setPanelErrorMessage(result.message);
+	}
+
+	function updatePanel() {
+		if (selected_display == -1) return;
+		else if (selected_display == 3) {
+			const display1 = displays[1];
+			display1.style.backgroundColor = display1.style.color;
+			display1.style.borderColor = display1.style.color;
+			display1.style.color = 'white';
+			const display2 = displays[2];
+			display2.style.backgroundColor = display2.style.color;
+			display2.style.borderColor = display2.style.color;
+			display2.style.color = 'white';
+		} else {
+			const display = displays[selected_display];
+			display.style.backgroundColor = display.style.color;
+			display.style.borderColor = display.style.color;
+			display.style.color = 'white';
+		}
 	}
 </script>
 
@@ -256,45 +331,56 @@
 			</li>
 		{/if}
 	</ul>
-	<h2 class="actions_title">Aktionen</h2>
-	<ul class="actions_box">
-		{#if bet}
+	{#if bet}
+		<h2 class="actions_title">Aktionen</h2>
+		<ul class="actions_box">
 			<li class="item" style="flex-direction: column;">
-				<a class="view" href="/bet?id={bet.id}&view=true" on:click|preventDefault={() => location.replace(`/bet?id=${bet.id}&view=true`)}>Wette ansehen</a>
+				<p style="margin-bottom: 5px;">Verbleibende Zeit setzen:</p>
+				<div class="timelimit_box">
+					<input type="number" class="input" placeholder="x" style="text-align: center; width: 40px" bind:value={timelimit_sec} title="0s bis 600s" />
+					<p>Sekunden</p>
+				</div>
+				<p id="error" bind:this={error_time}>{error_time_msg}</p>
+				<button class="submit" on:click={updateTime}>Zeitfenster ändern</button>
 			</li>
-		{/if}
-		<li class="item" style="flex-direction: column;">
-			<p style="margin-bottom: 5px;">Verbleibende Zeit setzen:</p>
-			<div class="timelimit_box">
-				<input type="number" class="input" placeholder="x" style="text-align: center; width: 40px" bind:value={timelimit_sec} title="0s bis 600s" />
-				<p>Sekunden</p>
-			</div>
-			<p id="error" bind:this={error_time}>{error_time_msg}</p>
-			<button class="submit" on:click={updateTime}>Zeitfenster ändern</button>
-		</li>
-		<li class="item" style="flex-direction: column;">
-			<p style="margin-bottom: 5px;">Wähle die Gewinn-Option:</p>
-			<div class="decision_choices">
-				{#each choices as choice, index}
-					{#if isYesNo}
-						<button
-							class="decision_choice decision_choice_yesno"
-							on:click={() => onSetYesNoChoice(index, choice == 'yes')}
-							bind:this={choices_elements[index]}
-							style="color:{getColor(index)}; border-color={getColor(index)};"
-							><img src={getColoredYesNoImage(choice == 'yes')} bind:this={choices_images[index]} alt={choice} width="35" height="35" /></button
-						>
-					{:else}
-						<button class="decision_choice" on:click={() => onSetChoice(index)} bind:this={choices_elements[index]} style="color:{getColor(index)}; border-color={getColor(index)};"
-							>{getChoiceCharIndex(index)}</button
-						>
-					{/if}
-				{/each}
-			</div>
-			<p id="error" bind:this={error}>{error_msg}</p>
-			<button class="submit" on:click={onDecision}>Wette ausschütten</button>
-		</li>
-	</ul>
+			<li class="item" style="flex-direction: column;">
+				<p style="margin-bottom: 5px;">Wähle einen Bildschirm aus:</p>
+				<div class="decision_choices">
+					<button class="decision_choice" on:click={() => onSetDisplay(1)} bind:this={displays[1]} style="color:#3bc5e7; border-color=#3bc5e7; min-width: 45px;">1</button>
+					<button class="decision_choice" on:click={() => onSetDisplay(2)} bind:this={displays[2]} style="color:#3bc5e7; border-color=#3bc5e7; min-width: 45px;">2</button>
+				</div>
+				<p id="error_panel" bind:this={error_panel}>{error_panel_msg}</p>
+			</li>
+			{#if !bet.match_id}
+				<li class="item" style="flex-direction: column;">
+					<p style="margin-bottom: 5px;">Wähle die Gewinn-Option:</p>
+					<div class="decision_choices">
+						{#each choices as choice, index}
+							{#if isYesNo}
+								<button
+									class="decision_choice decision_choice_yesno"
+									on:click={() => onSetYesNoChoice(index, choice == 'yes')}
+									bind:this={choices_elements[index]}
+									style="color:{getColor(index)}; border-color={getColor(index)};"
+									><img src={getColoredYesNoImage(choice == 'yes')} bind:this={choices_images[index]} alt={choice} width="35" height="35" /></button
+								>
+							{:else}
+								<button class="decision_choice" on:click={() => onSetChoice(index)} bind:this={choices_elements[index]} style="color:{getColor(index)}; border-color={getColor(index)};"
+									>{getChoiceCharIndex(index)}</button
+								>
+							{/if}
+						{/each}
+					</div>
+					<p id="error" bind:this={error}>{error_msg}</p>
+					<button class="submit" on:click={onDecision}>Wette ausschütten</button>
+				</li>
+			{:else}
+				<li class="item" style="flex-direction: column;">
+					<a class="view" href="/bet?id={bet.id}&view=true" on:click|preventDefault={() => location.replace(`/admin/match?id=${bet.match_id}&view=true`)}>Spiel ansehen</a>
+				</li>
+			{/if}
+		</ul>
+	{/if}
 </div>
 
 <Footer />

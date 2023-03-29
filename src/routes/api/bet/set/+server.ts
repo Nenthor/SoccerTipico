@@ -2,6 +2,7 @@ import { Bet, getBet, getUser, updateBet, updateUser } from '$lib/server/databas
 import type { RequestHandler } from './$types';
 import config from '$lib/server/data/config.json' assert { type: 'json' };
 import { sendToBet } from '$lib/server/websocket';
+import { getPanelData, updatePanelBet } from '$lib/server/settings';
 
 let cooldown: { [key: string]: boolean } = {};
 let update: { [key: string]: Bet | null } = {};

@@ -278,7 +278,7 @@
 					</button>
 					{#each matches_search as match}
 						{#if match.team1 && match.team2}
-							<button class="scroler_Element" on:click={() => showMatch(match)}>
+							<button class="scroler_Element" style="background-color: {match.finished ? '' : '#169916'};" on:click={() => showMatch(match)}>
 								<p>{match.team1.name} vs. {match.team2.name}</p>
 							</button>
 						{/if}
@@ -315,7 +315,7 @@
 		width: 100%;
 		text-align: center;
 		color: white;
-		margin: 20px 0;
+		margin-bottom: 20px;
 	}
 
 	.containers {
@@ -350,7 +350,7 @@
 		width: 100%;
 		text-align: center;
 		color: white;
-		margin-top: 25px;
+		margin: 20px 0 5px 0;
 	}
 
 	.container_subtitle {

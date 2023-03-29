@@ -2,6 +2,7 @@
 	import Footer from '$lib/Footer.svelte';
 	import Navbar from '$lib/Navbar.svelte';
 	import { onMount } from 'svelte';
+	import type { PageData } from './$types';
 
 	let name: string;
 	let group: string;
@@ -12,29 +13,23 @@
 	});
 
 	async function onSubmit() {
-		if(!group){
-			setErrorMessage('Gebe einen Namen ein.');
-			return;
+		if (!group) setErrorMessage('Gebe einen Namen ein.');
+		else if (group.toUpperCase() != 'A' && group.toUpperCase() != 'B') setErrorMessage('Gib eine Gruppe ein');
+		else if (!name) setErrorMessage('Gebe einen Namen ein.');
+		else {
+			const res = await fetch('/api/team/create', { method: 'POST', headers: { name: name, group: group.toUpperCase() } });
+			if (!res) {
+				setErrorMessage('Der Server ist momentan nicht erreichbar.');
+				return;
+			}
+			const result = await res.json();
+			if (result.success) {
+				setErrorMessage('Team wurde erfolgreich erstellt.', true);
+				setTimeout(() => {
+					location.href = '/admin';
+				}, 5000);
+			} else if (result.message) setErrorMessage(result.message);
 		}
-		if(group != 'A' && group != 'B' && group != 'a' && group != 'b'){
-			setErrorMessage('Gib eine Gruppe ein');
-			return;
-		}
-
-		if (!name) {
-			setErrorMessage('Gebe einen Namen ein.');
-			return;
-		}
-		const res = await fetch('/api/team/create', { method: 'POST', headers: {name: name, group: group} });
-		if (!res) {
-			setErrorMessage('Der Server ist momentan nicht erreichbar.');
-			return;
-		}
-		const result = await res.json();
-		if (result.success) {
-			setErrorMessage('Team wurde erfolgreich erstellt.', true);
-			setTimeout(() => {location.href = '/admin';}, 5000);
-		} else if (result.message) setErrorMessage(result.message);
 	}
 
 	let error_msg = '';
@@ -61,7 +56,7 @@
 	<h1 class="title">Neues Team erstellen</h1>
 	<form action="" class="form">
 		<input type="text" class="input" placeholder="Teamname" style="width: 80%; margin-bottom: 20px" bind:this={autoFocus} bind:value={name} />
-		<input type="text" class="input" placeholder="A/B" style="width: 80%; margin-bottom: 20px" bind:this={autoFocus} bind:value={group} />
+		<input type="text" class="input" placeholder="Gruppe" style="width: 80%; margin-bottom: 20px" bind:this={autoFocus} bind:value={group} />
 		<p id="error" bind:this={error}>{error_msg}</p>
 		<button class="submit" on:click={onSubmit}>Erstellen</button>
 	</form>
@@ -101,8 +96,6 @@
 		position: relative;
 	}
 
-	
-
 	.input {
 		padding: 5px 10px;
 		border: 3px solid transparent;
@@ -126,12 +119,11 @@
 		overflow-wrap: break-word;
 		width: clamp(200px, 50vw, 500px);
 		margin: 3px 0;
-		min-height: 20px;
 	}
 
 	.submit {
 		border: none;
-		margin-top: 5px;
+		margin: 5px 0;
 		padding: 8px 0;
 		min-width: 50%;
 		border-radius: 25px;

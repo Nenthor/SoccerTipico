@@ -1,1 +1,13 @@
-{"public":false}
+{
+  "public": false,
+  "panel1": {
+    "teams": "[{\"id\":\"r8m8gsjk0gfr3gl\",\"name\":\"Almans\",\"goal_difference\":2,\"win\":0,\"draw\":6,\"lose\":0,\"group\":\"B\"},{\"id\":\"kioj1maomhhij43\",\"name\":\"Großstadttieger\",\"goal_difference\":0,\"win\":0,\"draw\":3,\"lose\":0,\"group\":\"A\"},{\"id\":\"7g9wnkdzjkut1yz\",\"name\":\"Techniker\",\"goal_difference\":-2,\"win\":0,\"draw\":4,\"lose\":0,\"group\":\"A\"},{\"id\":\"d3mc2fl6rsjcuyv\",\"name\":\"Waldjäger\",\"goal_difference\":0,\"win\":0,\"draw\":3,\"lose\":0,\"group\":\"A\"},{\"id\":\"1eh2q5q25n8a8l5\",\"name\":\"test\",\"goal_difference\":0,\"win\":0,\"draw\":0,\"lose\":0,\"group\":\"B\"}]",
+    "match": "{\"id\":\"llqtla3lo4hi308\",\"team1\":{\"id\":\"r8m8gsjk0gfr3gl\",\"name\":\"Almans\",\"goal_difference\":2,\"win\":0,\"draw\":6,\"lose\":0,\"group\":\"B\"},\"team2\":{\"id\":\"7g9wnkdzjkut1yz\",\"name\":\"Techniker\",\"goal_difference\":-2,\"win\":0,\"draw\":4,\"lose\":0,\"group\":\"A\"},\"goals1\":2,\"goals2\":0,\"finished\":false,\"bet\":null}",
+    "bet": "{\"id\":\"sghdlfb4yxxdu8e\",\"question\":\"Almans vs. Techniker\",\"choices\":[{\"Team Almans gewinnt\":0},{\"Unentschieden\":0},{\"Team Techniker gewinnt\":0}],\"timelimit\":\"2023-03-28 21:53:38.180Z\",\"match_id\":\"llqtla3lo4hi308\"}"
+  },
+  "panel2": {
+    "teams": "[{\"id\":\"r8m8gsjk0gfr3gl\",\"name\":\"Almans\",\"goal_difference\":2,\"win\":0,\"draw\":6,\"lose\":0,\"group\":\"B\"},{\"id\":\"kioj1maomhhij43\",\"name\":\"Großstadttieger\",\"goal_difference\":0,\"win\":0,\"draw\":3,\"lose\":0,\"group\":\"A\"},{\"id\":\"7g9wnkdzjkut1yz\",\"name\":\"Techniker\",\"goal_difference\":-2,\"win\":0,\"draw\":4,\"lose\":0,\"group\":\"A\"},{\"id\":\"d3mc2fl6rsjcuyv\",\"name\":\"Waldjäger\",\"goal_difference\":0,\"win\":0,\"draw\":3,\"lose\":0,\"group\":\"A\"},{\"id\":\"1eh2q5q25n8a8l5\",\"name\":\"test\",\"goal_difference\":0,\"win\":0,\"draw\":0,\"lose\":0,\"group\":\"B\"}]",
+    "match": "{\"id\":\"llqtla3lo4hi308\",\"team1\":{\"id\":\"r8m8gsjk0gfr3gl\",\"name\":\"Almans\",\"goal_difference\":2,\"win\":0,\"draw\":6,\"lose\":0,\"group\":\"B\"},\"team2\":{\"id\":\"7g9wnkdzjkut1yz\",\"name\":\"Techniker\",\"goal_difference\":-2,\"win\":0,\"draw\":4,\"lose\":0,\"group\":\"A\"},\"goals1\":2,\"goals2\":0,\"finished\":false,\"bet\":null}",
+    "bet": "{\"id\":\"sghdlfb4yxxdu8e\",\"question\":\"Almans vs. Techniker\",\"choices\":[{\"Team Almans gewinnt\":0},{\"Unentschieden\":0},{\"Team Techniker gewinnt\":0}],\"timelimit\":\"2023-03-28 21:53:38.180Z\",\"match_id\":\"llqtla3lo4hi308\"}"
+  }
+}
