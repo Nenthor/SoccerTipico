@@ -16,7 +16,10 @@ export const POST = (async ({ request }) => {
 	if (!check1 || !check2) return getResponse(false, `Team existiert nicht`);
 
 	const check3 = await getMatchByTeamIDs(team1_id, team2_id);
-	if (check3) return getResponse(false, `Spiel ist bereits erstellt.`);
+	if (check3 && !check3.finished) return getResponse(false, `Spiel ist bereits erstellt.`);
+
+	const check4 = await getMatchByTeamIDs(team2_id, team1_id);
+	if (check4 && !check4.finished) return getResponse(false, `Spiel ist bereits erstellt.`);
 
 	const match = await createMatch(team1_id, team2_id, null);
 	if (!match) return getResponse(false, `Der Server ist momentan überlastet.`);

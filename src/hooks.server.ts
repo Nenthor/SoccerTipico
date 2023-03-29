@@ -14,6 +14,7 @@ let firstConnection = false;
 const noAuthAllowedRoutes = ['/authentication', '/api/register', '/api/login'];
 const alwaysAllowedRouts = ['/datenschutz', '/error'];
 const adminRoutes = [
+	'/panel',
 	'/admin',
 	'/admin/user',
 	'/admin/newbet',
@@ -33,10 +34,12 @@ const adminRoutes = [
 	'/api/user/globalreset',
 	'/api/team/create',
 	'/api/team/delete',
+	'/api/team/reset',
 	'/api/match/create',
 	'/api/match/finish',
 	'/api/match/update',
 	'/api/match/delete',
+	'/api/match/status',
 	'/api/panel/bet',
 	'/api/panel/match'
 ];

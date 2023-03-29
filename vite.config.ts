@@ -11,7 +11,7 @@ export default defineConfig({
 			cert: fs.readFileSync('./src/lib/server/data/certificate.cer')
 		},
 		watch: {
-			ignored: ['**/settings.json']
+			ignored: ['**/settingss.json']
 		}
 	},
 	plugins: [sveltekit(), viteCompression()]

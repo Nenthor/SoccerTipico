@@ -13,13 +13,16 @@
 	let error_delete_msg = '';
 	let error_finish_msg = '';
 	let error_panel_msg = '';
+	let global_error_msg = '';
 	let goals1: number | null;
 	let goals2: number | null;
 	let selected_display = -1;
+	let is_groupphase = false;
 
-	if (data.success && data.match) {
+	if (data.success && data.match && data.groupphase) {
 		match = JSON.parse(data.match);
 		self = JSON.parse(data.self);
+		is_groupphase = data.groupphase == 'true';
 		if (data.panel) selected_display = parseInt(data.panel);
 	}
 
@@ -160,7 +163,7 @@
 		}
 		const result = await res.json();
 		if (result.success) {
-			setPanelErrorMessage('Das Zeitfenster wurde erfolgreich aktualisiert.', true);
+			setPanelErrorMessage('Bildschirm wurde erfolgreich aktualisiert.', true);
 		} else if (result.message) setPanelErrorMessage(result.message);
 	}
 
@@ -192,6 +195,31 @@
 		else error_panel.style.color = '#cd3232';
 		timeout_panel = setTimeout(() => {
 			error_panel_msg = '';
+		}, 5000);
+	}
+
+	async function setTournamantState() {
+		const res = await fetch('/api/match/status', { method: 'POST', headers: { status: `${!is_groupphase}` } });
+		if (!res) {
+			setGlobalErrorMessage('Der Server ist momentan nicht erreichbar.');
+			return;
+		}
+		const result = await res.json();
+		if (result.success) {
+			const status = is_groupphase ? 'Gruppenphase' : 'Knockoutphase';
+			setGlobalErrorMessage(`Tunierpagse wurde erfolgreich auf ${status} gesetzt.`, true);
+		} else if (result.message) setGlobalErrorMessage(result.message);
+	}
+
+	let global_error: HTMLElement;
+	let global_timeout: any;
+	function setGlobalErrorMessage(msg: string, success = false) {
+		if (global_timeout) clearTimeout(global_timeout);
+		global_error_msg = msg;
+		if (success) global_error.style.color = '#32cd32';
+		else global_error.style.color = '#cd3232';
+		global_timeout = setTimeout(() => {
+			global_error_msg = '';
 		}, 5000);
 	}
 </script>
@@ -238,6 +266,19 @@
 		<li class="item" style="flex-direction: column;">
 			<button class="submit delete" on:click={deleteMatch}>Spiel Löschen</button>
 			<p class="error" id="error_delete" bind:this={delete_error}>{error_delete_msg}</p>
+		</li>
+	</ul>
+	<h2 class="actions_title">Globale Aktionen</h2>
+	<ul class="actions_box">
+		<li class="item" style="flex-direction: column;">
+			<p style="text-align: center;">Tunierphase ist Gruppenphase:</p>
+			<label class="switch">
+				<input type="checkbox" bind:checked={is_groupphase} on:click={setTournamantState} />
+				<span class="slider round" />
+			</label>
+		</li>
+		<li class="item" style="margin: 0;">
+			<p class="error" bind:this={global_error}>{global_error_msg}</p>
 		</li>
 	</ul>
 </div>
@@ -401,5 +442,66 @@
 		border-width: 2px;
 		border-style: solid;
 		font-size: 1.75rem;
+	}
+
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 60px;
+		height: 34px;
+		margin-top: 10px;
+	}
+
+	.switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #999;
+		-webkit-transition: 0.4s;
+		transition: 0.4s;
+	}
+
+	.slider:before {
+		position: absolute;
+		content: '';
+		height: 26px;
+		width: 26px;
+		left: 4px;
+		bottom: 4px;
+		background-color: white;
+		-webkit-transition: 0.4s;
+		transition: 0.4s;
+	}
+
+	input:checked + .slider {
+		background-color: #2196f3;
+	}
+
+	input:focus + .slider {
+		box-shadow: 0 0 1px #2196f3;
+	}
+
+	input:checked + .slider:before {
+		-webkit-transform: translateX(26px);
+		-ms-transform: translateX(26px);
+		transform: translateX(26px);
+	}
+
+	/* Rounded sliders */
+	.slider.round {
+		border-radius: 34px;
+	}
+
+	.slider.round:before {
+		border-radius: 50%;
 	}
 </style>

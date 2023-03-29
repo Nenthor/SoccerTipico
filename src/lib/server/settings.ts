@@ -6,15 +6,17 @@ import type { Match, Team, Bet } from '$lib/server/database';
 
 export const settings = {
 	public: settings_json.public,
+	groupphase: settings_json.groupphase,
 	panel1: settings_json.panel1,
 	panel2: settings_json.panel2
 };
 
 export interface PanelData {
-	teams: Team[];
+	teams: Team[] | null;
 	match_history: Match[];
 	match: Match | null;
 	bet: Bet | null;
+	groupphase: boolean;
 }
 
 let match_history: Match[] = [];
@@ -27,6 +29,11 @@ export function setupSettings(new_match_history: string, new_teams: string) {
 
 export function setStatus(status: boolean) {
 	settings.public = status;
+	updateFile();
+}
+
+export function setGrouphase(phase: boolean) {
+	settings.groupphase = phase;
 	updateFile();
 }
 
@@ -74,14 +81,16 @@ export function getPanelData(panel_id: string) {
 			teams,
 			match_history,
 			bet: settings.panel1.bet ? JSON.parse(settings.panel1.bet) : null,
-			match: settings.panel1.match ? JSON.parse(settings.panel1.match) : null
+			match: settings.panel1.match ? JSON.parse(settings.panel1.match) : null,
+			groupphase: settings.groupphase
 		};
 	} else if (panel_id == '2') {
 		data = {
 			teams,
 			match_history,
 			bet: settings.panel2.bet ? JSON.parse(settings.panel2.bet) : null,
-			match: settings.panel2.match ? JSON.parse(settings.panel2.match) : null
+			match: settings.panel2.match ? JSON.parse(settings.panel2.match) : null,
+			groupphase: settings.groupphase
 		};
 	} else return null;
 	return data;

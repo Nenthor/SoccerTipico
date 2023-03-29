@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 
 	let isOpen = false;
@@ -21,10 +22,23 @@
 		else isMobileMenu = false;
 		is_loading = false;
 	}
+
+	let count = 0;
+	function onTap() {
+		if (document.location.pathname == '/dashboard') {
+			count++;
+			if (count >= 2) {
+				document.location.pathname = '/paytowin';
+			}
+			setTimeout(() => {
+				count--;
+			}, 500);
+		} else document.location.pathname = '/dashboard';
+	}
 </script>
 
 <nav bind:clientWidth={total_width}>
-	<a href="/dashboard" id="title"><h3 id="nav_title" bind:clientWidth={title_width}>SoccerTipico</h3></a>
+	<a href="/dashboard" id="title" on:click|preventDefault={onTap}><h3 id="nav_title" bind:clientWidth={title_width}>SoccerTipico</h3></a>
 	{#if isMobileMenu}
 		<button id="nav_toggle" on:click={onClick}>
 			<span class="nav_bar {isOpen ? 'nav_bar_open' : ''}" />

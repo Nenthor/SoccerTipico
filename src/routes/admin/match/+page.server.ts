@@ -1,5 +1,5 @@
 import { getMatch } from '$lib/server/database';
-import { getPanelData } from '$lib/server/settings';
+import { getPanelData, settings } from '$lib/server/settings';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ url, locals }) => {
@@ -20,5 +20,5 @@ export const load = (async ({ url, locals }) => {
 		else panel = 2;
 	}
 
-	return { success: true, match: JSON.stringify(match), self: JSON.stringify(locals), panel: panel.toString() };
+	return { success: true, match: JSON.stringify(match), self: JSON.stringify(locals), panel: panel.toString(), groupphase: `${settings.groupphase}` };
 }) satisfies PageServerLoad;

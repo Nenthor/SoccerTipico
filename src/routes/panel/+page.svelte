@@ -69,6 +69,8 @@
 			switch (show) {
 				case 'leaderboard':
 					show = 'groups';
+					if (panel_data.groupphase) show = 'groups';
+					else show = 'standings';
 					break;
 				case 'groups':
 					show = 'standings';
@@ -90,8 +92,8 @@
 		<div class="standings_box">
 			<div class="standings">
 				<div class="standings_b">
-					<p><span> {panel_data.match.goals1}</span> {panel_data.match.team1.name.toUpperCase()}</p>
-					<p><span> {panel_data.match.goals2}</span> {panel_data.match.team2.name.toUpperCase()}</p>
+					<p><span>{panel_data.match.goals1}</span> : {panel_data.match.team1.name.toUpperCase()}</p>
+					<p><span>{panel_data.match.goals2}</span> : {panel_data.match.team2.name.toUpperCase()}</p>
 				</div>
 			</div>
 		</div>
@@ -106,29 +108,31 @@
 						<h1>Gruppen</h1>
 						<br />
 						{#each groups as group}
-							<table class="groupTable">
-								<thead>
-									<tr>
-										<th style="width: 200px;">Gruppe {group}</th>
-										<th>Spiele</th>
-										<th>Torverhältnis</th>
-										<th>Punkte</th>
-									</tr>
-								</thead>
-								{#if panel_data && panel_data.teams}
-									{#each panel_data.teams as team}
-										{#if team.group == group}
-											<tr>
-												<td>{team.name}</td>
-												<td>{team.lose + team.draw + team.win}</td>
-												<td>{team.goal_difference}</td>
-												<td>{team.win * 3 + team.draw * 1}</td>
-											</tr>
-										{/if}
-									{/each}
-								{/if}
-							</table>
-							<br />
+							{#if groups.length <= 2 || panel_data?.match?.team1.group == group}
+								<table class="groupTable">
+									<thead>
+										<tr>
+											<th style="width: 200px;">Gruppe {group}</th>
+											<th>Spiele</th>
+											<th>Torverhältnis</th>
+											<th>Punkte</th>
+										</tr>
+									</thead>
+									{#if panel_data && panel_data.teams}
+										{#each panel_data.teams as team}
+											{#if team.group == group}
+												<tr>
+													<td>{team.name}</td>
+													<td>{team.lose + team.draw + team.win}</td>
+													<td>{team.goal_difference}</td>
+													<td>{team.win * 3 + team.draw * 1}</td>
+												</tr>
+											{/if}
+										{/each}
+									{/if}
+								</table>
+							{/if}
+							<br /><br />
 						{/each}
 					</div>
 				{:else if show == 'standings'}

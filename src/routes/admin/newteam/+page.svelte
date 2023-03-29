@@ -14,7 +14,6 @@
 
 	async function onSubmit() {
 		if (!group) setErrorMessage('Gebe einen Namen ein.');
-		else if (group.toUpperCase() != 'A' && group.toUpperCase() != 'B') setErrorMessage('Gib eine Gruppe ein');
 		else if (!name) setErrorMessage('Gebe einen Namen ein.');
 		else {
 			const res = await fetch('/api/team/create', { method: 'POST', headers: { name: name, group: group.toUpperCase() } });

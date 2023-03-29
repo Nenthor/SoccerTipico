@@ -5,7 +5,6 @@ import { readFileSync } from 'fs';
 import config from './data/config.json' assert { type: 'json' };
 import { getLeaders } from './database';
 import type { Leader } from '$lib/Types';
-import { getPanelData } from './settings';
 
 let wss: WebSocketServer;
 
@@ -16,7 +15,7 @@ const ssl = {
 
 const dashboard_sockets: WebSocket[] = [];
 const leaderboard_sockets: WebSocket[] = [];
-const panel_sockets: { [panel_id: string]: WebSocket } = {};
+const panel_sockets: { [panel_id: string]: WebSocket[] } = {};
 const bet_sockets: { [bet_id: string]: WebSocket[] } = {};
 
 export function setupWebsocketServer(port: number) {
@@ -46,7 +45,8 @@ export function setupWebsocketServer(port: number) {
 				const panel_id_str = url.searchParams.get('id');
 				if (panel_id_str && !isNaN(parseInt(panel_id_str))) {
 					const panel_id = parseInt(panel_id_str);
-					panel_sockets[panel_id] = ws;
+					if (!panel_sockets[panel_id]) panel_sockets[panel_id] = [];
+					storeSocket(ws, panel_sockets[panel_id]);
 				} else ws.close();
 				break;
 			default:
@@ -118,7 +118,10 @@ export function sendToBet(bet_id: string, message: string) {
  */
 export function sendToPanel(panel_id: string, message: string) {
 	if (!wss || !panel_sockets[panel_id]) return;
-	if (panel_sockets[panel_id].OPEN) panel_sockets[panel_id].send(message);
+	panel_sockets[panel_id] = panel_sockets[panel_id].filter((ws) => ws.OPEN);
+	for (const ws of panel_sockets[panel_id]) {
+		if (ws.OPEN) ws.send(message);
+	}
 }
 
 export function clearWebsocketBet(bet_id: string) {
