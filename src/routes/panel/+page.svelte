@@ -89,7 +89,10 @@
 	{#if panel_data && panel_data.match}
 		<div class="standings_box">
 			<div class="standings">
-				<p>{panel_data.match.team1.name} {panel_data.match.goals1} : {panel_data.match.goals2} {panel_data.match.team2.name}</p>
+				<div class="standings_b">
+					<p><span> {panel_data.match.goals1}</span> {panel_data.match.team1.name.toUpperCase()}</p>
+					<p><span> {panel_data.match.goals2}</span> {panel_data.match.team2.name.toUpperCase()}</p>
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -228,14 +231,18 @@
 		flex-wrap: wrap;
 		align-items: center;
 		justify-content: center;
-		text-align: center;
 	}
 
-	.standings > p {
-		font-size: clamp(2rem, 7vmin, 8rem);
+	.standings_b > p > span {
+		font-size: clamp(2rem, 6vmin, 7rem);
 		width: 100%;
-		text-align: center;
 		font-family: roboto;
+		font-weight: bold;
+	}
+
+	.standings_b > p {
+		font-size: clamp(2rem, 4vmin, 5rem);
+		width: 100%;
 		font-weight: bold;
 	}
 
