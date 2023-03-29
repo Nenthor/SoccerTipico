@@ -2,9 +2,7 @@
 	import Leaderboard from './Leaderboard.svelte';
 	import BetBar from './BetBar.svelte';
 	import Navbar from '$lib/Navbar.svelte';
-	import Footer from '$lib/Footer.svelte';
-	import type { Team, Match, User } from '$lib/server/database';
-	import type { Bet, Leader, PanelData } from '$lib/Types';
+	import type { Bet, Leader, PanelData, User } from '$lib/Types';
 	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
 
@@ -85,105 +83,93 @@
 	});
 </script>
 
-<!--Navbar /-->
+<Navbar />
+
 <div class="content">
-	<div class="container">
-		<div class="slides">
-			{#if show == 'leaderboard'}
-				<div class="slide"><Leaderboard {leaders} /></div>
-			{:else if show == 'groups'}
-				<div class="slide">
-					<h1>Gruppen</h1>
-					<br />
-					{#each groups as group}
+	{#if panel_data && panel_data.match}
+		<div class="standings_box">
+			<div class="standings">
+				<p>{panel_data.match.team1.name} {panel_data.match.goals1} : {panel_data.match.goals2} {panel_data.match.team2.name}</p>
+			</div>
+		</div>
+	{/if}
+	<div class="container_box">
+		<div class="container">
+			<div class="slides">
+				{#if show == 'leaderboard'}
+					<div class="slide"><Leaderboard {leaders} /></div>
+				{:else if show == 'groups'}
+					<div class="slide">
+						<h1>Gruppen</h1>
+						<br />
+						{#each groups as group}
+							<table class="groupTable">
+								<thead>
+									<tr>
+										<th style="width: 200px;">Gruppe {group}</th>
+										<th>Spiele</th>
+										<th>Torverhältnis</th>
+										<th>Punkte</th>
+									</tr>
+								</thead>
+								{#if panel_data && panel_data.teams}
+									{#each panel_data.teams as team}
+										{#if team.group == group}
+											<tr>
+												<td>{team.name}</td>
+												<td>{team.lose + team.draw + team.win}</td>
+												<td>{team.goal_difference}</td>
+												<td>{team.win * 3 + team.draw * 1}</td>
+											</tr>
+										{/if}
+									{/each}
+								{/if}
+							</table>
+							<br />
+						{/each}
+					</div>
+				{:else if show == 'standings'}
+					<div class="slide">
+						<h1>Ergebnisse</h1>
+						<br />
 						<table class="groupTable">
 							<thead>
 								<tr>
-									<th style="width: 200px;">Gruppe {group}</th>
-									<th>Spiele</th>
-									<th>Torverhältnis</th>
-									<th>Punkte</th>
+									<th>Manschaft 1</th>
+									<th>Ergebnis</th>
+									<th>Manschaft 2</th>
 								</tr>
 							</thead>
-							{#if panel_data && panel_data.teams}
-								{#each panel_data.teams as team}
-									{#if team.group == group}
-										<tr>
-											<td>{team.name}</td>
-											<td>{team.lose + team.draw + team.win}</td>
-											<td>{team.goal_difference}</td>
-											<td>{team.win * 3 + team.draw * 1}</td>
-										</tr>
-									{/if}
+							{#if panel_data && panel_data.match_history}
+								{#each panel_data.match_history as match}
+									<tr>
+										<td>{match.team1.name}</td>
+										<td>{match.goals1} : {match.goals2}</td>
+										<td>{match.team2.name}</td>
+									</tr>
 								{/each}
 							{/if}
 						</table>
-						<br />
-					{/each}
-				</div>
-			{:else if show == 'standings'}
-				<div class="slide">
-					<h1>Ergebnisse</h1>
-					<br />
-					<table class="groupTable">
-						<thead>
-							<tr>
-								<th>Manschaft 1</th>
-								<th>Ergebnis</th>
-								<th>Manschaft 2</th>
-							</tr>
-						</thead>
-						{#if panel_data && panel_data.match_history}
-							{#each panel_data.match_history as match}
-								<tr>
-									<td>{match.team1.name}</td>
-									<td>{match.goals1} : {match.goals2}</td>
-									<td>{match.team2.name}</td>
-								</tr>
-							{/each}
-						{/if}
-					</table>
-				</div>
-			{/if}
-		</div>
-	</div>
-	<div class="container">
-		<div class="parts">
-			<div class="part">
-				<p>
-					{#if panel_data && panel_data.match}
-						{panel_data.match.goals1}
-					{:else}
-						-
-					{/if}
-				</p>
-				<p>:</p>
-				<p>
-					{#if panel_data && panel_data.match}
-						{panel_data.match.goals2}
-					{:else}
-						-
-					{/if}
-				</p>
+					</div>
+				{/if}
 			</div>
-			{#if panel_data && panel_data.bet && bet}
-				<div class="part" id="dasAndereDind"><BetBar {bet} /></div>
-			{/if}
 		</div>
+		{#if panel_data && panel_data.bet && bet}
+			<div class="bet"><BetBar {bet} /></div>
+		{/if}
 	</div>
 </div>
 
-<!--Footer /-->
 <style>
 	.content {
-		/*margin-top: 75px;
-		padding: 20px 0;*/
 		width: 100%;
+		margin-top: 75px;
 		background-color: #161616;
 		display: flex;
 		flex-grow: 1;
 		justify-content: start;
 		align-items: center;
+		flex-direction: column;
 		z-index: 0;
 		color: #fff;
 	}
@@ -194,6 +180,11 @@
 		flex-wrap: wrap;
 		align-items: center;
 		justify-content: center;
+	}
+
+	.slide {
+		display: flex;
+		flex-direction: column;
 	}
 
 	.slides {
@@ -211,25 +202,28 @@
 	}
 
 	.groupTable {
+		max-width: 1000px;
 		width: 100%;
 		border-collapse: collapse;
 	}
 
-	.groupTable th, .groupTable td {
+	.groupTable th,
+	.groupTable td {
 		border-color: #fff;
 		border-width: 1px;
 		border-style: solid;
-		padding: 5px 0;
+		padding: 5px 10px;
 	}
 
-	.parts {
+	.standings_box {
+		width: 100%;
+		min-height: fit-content;
 		display: flex;
-		justify-content: start;
-		align-items: center;
+		margin: 20px 0;
 	}
 
-	.part {
-		margin: 20px;
+	.standings {
+		display: flex;
 		flex-grow: 1;
 		flex-wrap: wrap;
 		align-items: center;
@@ -237,15 +231,23 @@
 		text-align: center;
 	}
 
-	.part > p {
-		font-size: 10rem;
+	.standings > p {
+		font-size: clamp(2rem, 7vmin, 8rem);
 		width: 100%;
 		text-align: center;
 		font-family: roboto;
+		font-weight: bold;
 	}
 
-	#dasAndereDind {
+	.container_box {
+		display: flex;
+		width: 100%;
+		flex-grow: 1;
+	}
+
+	.bet {
 		height: 60vh;
+		margin: 0 40px 0 20px;
 	}
 
 	@media screen and (max-width: 600px) {

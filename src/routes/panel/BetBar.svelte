@@ -56,7 +56,7 @@
 
 <style>
 	.bet_stats {
-		min-width: 90px;
+		min-width: 125px;
 		width: 100%;
 		height: min(1000px, calc(100% - 20px));
 		margin: 10px 0;
