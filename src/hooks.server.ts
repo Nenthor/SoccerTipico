@@ -55,6 +55,7 @@ export const handle: Handle = (async ({ event, resolve }) => {
 		if (noAuthAllowedRoutes.includes(event.url.pathname)) {
 			if (!userSession.error) {
 				if (event.request.method == 'GET') throw redirect(307, '/dashboard');
+				else console.log(userSession.message);
 				return resolve(event);
 			}
 		} else {
