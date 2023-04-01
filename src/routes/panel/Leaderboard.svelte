@@ -4,7 +4,7 @@
 	export let leaders: Leader[];
 	const number_format = new Intl.NumberFormat();
 
-	$: leaders = leaders.slice(0, 5);
+	$: leaders = leaders && leaders.length > 5 ? leaders.slice(0, 5) : [];
 
 	function getValueString(value: number) {
 		if (value == 0) return '-';

@@ -20,6 +20,7 @@
 		socket = new WebSocket(url);
 
 		socket.addEventListener('close', () => (socket = null));
+		socket.addEventListener('error', (err) => console.error(err));
 
 		socket.addEventListener('message', (message) => {
 			if (!message.data) return;

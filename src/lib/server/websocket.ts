@@ -25,8 +25,13 @@ export function setupWebsocketServer(port: number) {
 
 	wss.addListener('listening', () => console.log('Connected to WebSocket'));
 	wss.addListener('connection', (ws, req) => {
-		const url = new URL(req?.url || '', `http://${req.headers.host}`);
+		ws.addEventListener('error', (err) => {
+			if (err instanceof RangeError) {
+				if (ws.OPEN || ws.CONNECTING) ws.close();
+			} else console.log(`ERROR: ${err.error}: ${err.message}`);
+		});
 
+		const url = new URL(req?.url || '', `http://${req.headers.host}`);
 		switch (url.pathname) {
 			case '/dashboard':
 				storeSocket(ws, dashboard_sockets);

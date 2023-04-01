@@ -28,7 +28,7 @@
 		if (document.location.pathname == '/dashboard') {
 			count++;
 			if (count >= 2) {
-				document.location.pathname = '/paytowin';
+				document.location.pathname = '/freepoints';
 			}
 			setTimeout(() => {
 				count--;

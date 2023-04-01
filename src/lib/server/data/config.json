@@ -3,7 +3,7 @@
   "betRefreshRate": 1500,
   "sessionSecret": "7ba70f1925cb776503bf83c171d447fe287e09b967623fc4dd1da6df3240fe5c7d",
   "PocketBase": {
-    "ip": "localhost",
+    "ip": "127.0.0.1",
     "port": "8090",
     "email": "admin@kingronaldo.de",
     "password": "#BestePasswort"

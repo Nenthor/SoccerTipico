@@ -1,12 +1,12 @@
 {
-  "public": false,
-  "groupphase": false,
+  "public": true,
+  "groupphase": true,
   "panel1": {
-    "match": "{\"id\":\"p01jvlhza01fhd0\",\"team1\":{\"id\":\"biwk4016pedplqr\",\"name\":\"Fußballgötter\",\"goal_difference\":-3,\"win\":2,\"draw\":0,\"lose\":0,\"group\":\"A\"},\"team2\":{\"id\":\"qkspmfu6oz1krap\",\"name\":\"Füchse\",\"goal_difference\":5,\"win\":2,\"draw\":1,\"lose\":0,\"group\":\"A\"},\"goals1\":1,\"goals2\":5,\"finished\":false,\"bet\":null}",
-    "bet": "{\"id\":\"16jtefb5jnvpswo\",\"question\":\"Fußballgötter vs. Füchse\",\"choices\":[{\"Team Fußballgötter gewinnt\":0},{\"Unentschieden\":0},{\"Team Füchse gewinnt\":0}],\"timelimit\":\"2023-03-29 20:48:36.934Z\",\"match_id\":\"p01jvlhza01fhd0\"}"
+    "match": "",
+    "bet": "{\"id\":\"vuzmzubcsrviddd\",\"question\":\"Jammy´s Bande vs. Benjamin Bierchen\",\"choices\":[{\"Team Jammy´s Bande gewinnt\":0},{\"Unentschieden\":0},{\"Team Benjamin Bierchen gewinnt\":0}],\"timelimit\":\"2023-03-30 16:13:25.345Z\",\"match_id\":\"xbksybzh0fpuu47\"}"
   },
   "panel2": {
     "match": "{\"id\":\"zl0fsakavin36xe\",\"team1\":{\"id\":\"qkspmfu6oz1krap\",\"name\":\"Füchse\",\"goal_difference\":5,\"win\":2,\"draw\":1,\"lose\":0,\"group\":\"A\"},\"team2\":{\"id\":\"owx82tlzvtqh5gk\",\"name\":\"Technik\",\"goal_difference\":1,\"win\":2,\"draw\":0,\"lose\":2,\"group\":\"A\"},\"goals1\":1,\"goals2\":2,\"finished\":false,\"bet\":null}",
-    "bet": ""
+    "bet": "{\"id\":\"zzfd44kk14xb0vy\",\"question\":\"Defensiver Kollaps vs. Kenias aller letzte Reserve\",\"choices\":[{\"Team Defensiver Kollaps gewinnt\":0},{\"Unentschieden\":0},{\"Team Kenias aller letzte Reserve gewinnt\":0}],\"timelimit\":\"2023-03-30 16:13:56.526Z\",\"match_id\":\"tvn9ovv9p6xxwr6\"}"
   }
 }

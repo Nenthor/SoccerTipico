@@ -39,6 +39,8 @@
 
 		socket = new WebSocket(url);
 		socket.addEventListener('close', () => (socket = null));
+		socket.addEventListener('error', (err) => console.error(err));
+
 		socket.addEventListener('message', (message) => {
 			if (!message.data) return;
 			const msg: string[] = message.data.split('==');
@@ -83,21 +85,21 @@
 
 		setInterval(nextSlide, 30000);
 	});
+
+	function validGroup(group: string) {
+		if (!panel_data.match) return true;
+		if (panel_data.match.team1.group == 'A' || panel_data.match.team1.group == 'B') {
+			if (group == 'A' || group == 'B') return true;
+		} else if (panel_data.match.team1.group == 'C' || panel_data.match.team1.group == 'D') {
+			if (group == 'C' || group == 'D') return true;
+		}
+		return false;
+	}
 </script>
 
 <Navbar />
 
 <div class="content">
-	{#if panel_data && panel_data.match}
-		<div class="standings_box">
-			<div class="standings">
-				<div class="standings_b">
-					<p><span>{panel_data.match.goals1}</span> : {panel_data.match.team1.name.toUpperCase()}</p>
-					<p><span>{panel_data.match.goals2}</span> : {panel_data.match.team2.name.toUpperCase()}</p>
-				</div>
-			</div>
-		</div>
-	{/if}
 	<div class="container_box">
 		<div class="container">
 			<div class="slides">
@@ -108,7 +110,7 @@
 						<h1>Gruppen</h1>
 						<br />
 						{#each groups as group}
-							{#if groups.length <= 2 || panel_data?.match?.team1.group == group}
+							{#if validGroup(group)}
 								<table class="groupTable">
 									<thead>
 										<tr>
@@ -149,11 +151,13 @@
 							</thead>
 							{#if panel_data && panel_data.match_history}
 								{#each panel_data.match_history as match}
-									<tr>
-										<td>{match.team1.name}</td>
-										<td>{match.goals1} : {match.goals2}</td>
-										<td>{match.team2.name}</td>
-									</tr>
+									{#if !panel_data.groupphase || validGroup(match.team1.group)}
+										<tr>
+											<td>{match.team1.name}</td>
+											<td>{match.goals1} : {match.goals2}</td>
+											<td>{match.team2.name}</td>
+										</tr>
+									{/if}
 								{/each}
 							{/if}
 						</table>

@@ -12,8 +12,8 @@
 </Navbar>
 
 <div class="content">
-	<h1 class="title">Pay to Win</h1>
-	<p class="subtitle">Möchtest du dir einen Vorteil verschaffen? <br />Klicke jetzt auf den Button und es werden GRATIS 5.000 auf dein Konto überwiesen.</p>
+	<h1 class="title">Easter Egg gefunden!</h1>
+	<p class="subtitle">Möchtest du dir einen Vorteil verschaffen? <br />Klicke jetzt auf den Button und es werden GRATIS 1.000 auf dein Konto überwiesen.</p>
 	{#if trap}
 		<img src="/images/rick-roll.gif" alt="server_burning" class="image" />
 	{:else}
