@@ -162,7 +162,7 @@
 	let chart: Chart;
 	function createChart() {
 		const points_distribution = [
-			{ label: '= 0', max_value: 0, amount: 0 },
+			{ label: '= 0', max_value: 1, amount: 0 },
 			{ label: '< 0,5k', max_value: 500, amount: 0 },
 			{ label: '< 1k', max_value: 1000, amount: 0 },
 			{ label: '= 1k', max_value: 1001, amount: 0 },

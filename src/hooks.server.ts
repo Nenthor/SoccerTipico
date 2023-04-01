@@ -54,8 +54,8 @@ export const handle: Handle = (async ({ event, resolve }) => {
 	if (!alwaysAllowedRouts.includes(event.url.pathname)) {
 		if (noAuthAllowedRoutes.includes(event.url.pathname)) {
 			if (!userSession.error) {
-				if (event.request.method != 'GET') return new Response(JSON.stringify({ success: false, message: 'Nicht berechtigt.' }), { status: 401 });
-				throw redirect(307, '/dashboard');
+				if (event.request.method == 'GET') throw redirect(307, '/dashboard');
+				return resolve(event);
 			}
 		} else {
 			if (userSession.error) {

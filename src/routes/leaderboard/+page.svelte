@@ -98,7 +98,7 @@
 				</li>
 			{/each}
 			{#if ranking > 10}
-				{#if ranking != 11}
+				{#if ranking != 10}
 					<p class="dots">...</p>
 				{/if}
 				<li class="leader_item">

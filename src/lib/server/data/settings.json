@@ -6,7 +6,7 @@
     "bet": "{\"id\":\"vuzmzubcsrviddd\",\"question\":\"Jammy´s Bande vs. Benjamin Bierchen\",\"choices\":[{\"Team Jammy´s Bande gewinnt\":0},{\"Unentschieden\":0},{\"Team Benjamin Bierchen gewinnt\":0}],\"timelimit\":\"2023-03-30 16:13:25.345Z\",\"match_id\":\"xbksybzh0fpuu47\"}"
   },
   "panel2": {
-    "match": "{\"id\":\"zl0fsakavin36xe\",\"team1\":{\"id\":\"qkspmfu6oz1krap\",\"name\":\"Füchse\",\"goal_difference\":5,\"win\":2,\"draw\":1,\"lose\":0,\"group\":\"A\"},\"team2\":{\"id\":\"owx82tlzvtqh5gk\",\"name\":\"Technik\",\"goal_difference\":1,\"win\":2,\"draw\":0,\"lose\":2,\"group\":\"A\"},\"goals1\":1,\"goals2\":2,\"finished\":false,\"bet\":null}",
+    "match": "",
     "bet": "{\"id\":\"zzfd44kk14xb0vy\",\"question\":\"Defensiver Kollaps vs. Kenias aller letzte Reserve\",\"choices\":[{\"Team Defensiver Kollaps gewinnt\":0},{\"Unentschieden\":0},{\"Team Kenias aller letzte Reserve gewinnt\":0}],\"timelimit\":\"2023-03-30 16:13:56.526Z\",\"match_id\":\"tvn9ovv9p6xxwr6\"}"
   }
 }
